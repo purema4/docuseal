@@ -377,8 +377,6 @@ module Templates
         Process::Sys.setresuid(uid, uid, uid)
 
         exec(env, *args, **options)
-      rescue StandardError
-        exit!(127) # rubocop:disable Rails/Exit -- a forked child must not run the parent's at_exit hooks
       end
 
       begin

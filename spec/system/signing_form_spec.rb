@@ -310,7 +310,8 @@ RSpec.describe 'Signing Form' do
       fill_in 'Cell code', with: '123'
       find('#submit_form_button').click
 
-      expect(page).to have_button('Download')
+      # The signed document is generated inline (sidekiq: :inline) before the completed page is shown.
+      expect(page).to have_button('Download', wait: 15)
       expect(page).to have_content('Document has been signed!')
 
       submitter = template.submissions.last.submitters.last
