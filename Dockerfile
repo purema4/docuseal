@@ -55,6 +55,12 @@ WORKDIR /app
 RUN apk add --no-cache libpq vips redis onnxruntime leptonica && \
     rm -f /usr/bin/onnx_test_runner /usr/bin/onnxruntime_test
 
+# LibreOffice is used by POST /api/templates/docx to convert DOCX files to PDF.
+# Build with --build-arg INSTALL_LIBREOFFICE=false to leave it out and keep the image smaller.
+ARG INSTALL_LIBREOFFICE=true
+
+RUN if [ "$INSTALL_LIBREOFFICE" = "true" ]; then apk add --no-cache libreoffice-writer; fi
+
 RUN addgroup -g 2000 docuseal && adduser -u 2000 -G docuseal -s /bin/sh -D -h /home/docuseal docuseal
 
 RUN echo $'.include = /etc/ssl/openssl.cnf\n\

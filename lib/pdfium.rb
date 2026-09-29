@@ -1180,7 +1180,7 @@ class Pdfium
       Pdfium.FPDFText_ClosePage(text_page) if text_page && !text_page.null?
     end
 
-    def redact(rects, &image_processor)
+    def redact(rects, keep_font: false, &image_processor)
       ensure_not_closed!
 
       flatten
@@ -1195,7 +1195,7 @@ class Pdfium
 
       unwrap_form_objects(rect_bounds)
 
-      remove_redacted_chars(rect_bounds)
+      remove_redacted_chars(rect_bounds, keep_font:)
       redact_image_objects(rect_bounds, &image_processor) if image_processor
       draw_redaction_rects(rect_bounds)
 
@@ -1248,7 +1248,7 @@ class Pdfium
       Pdfium.FPDFPage_GenerateContent(@page_ptr)
     end
 
-    def remove_redacted_chars(rect_bounds)
+    def remove_redacted_chars(rect_bounds, keep_font: false)
       text_page = Pdfium.FPDFText_LoadPage(@page_ptr)
 
       raise PdfiumError, 'Failed to load text page' if text_page.null?
@@ -1262,7 +1262,7 @@ class Pdfium
       text_objects_chars.each_value do |entry|
         next if entry[:chars].none? { |char| char[:redacted] }
 
-        rebuild_text_object_survivors(entry) unless entry[:chars].all? { |char| char[:redacted] }
+        rebuild_text_object_survivors(entry, keep_font:) unless entry[:chars].all? { |char| char[:redacted] }
 
         remove_page_object(entry[:ptr])
       end
@@ -1381,8 +1381,9 @@ class Pdfium
       text_objects_chars
     end
 
-    def rebuild_text_object_survivors(entry)
-      font_ptr = @document.standard_font
+    def rebuild_text_object_survivors(entry, keep_font: false)
+      font_ptr = Pdfium.FPDFTextObj_GetFont(entry[:ptr]) if keep_font
+      font_ptr = @document.standard_font if font_ptr.nil? || font_ptr.null?
 
       font_size_ptr = FFI::MemoryPointer.new(:float)
       font_size = Pdfium.FPDFTextObj_GetFontSize(entry[:ptr], font_size_ptr).zero? ? 12.0 : font_size_ptr.read_float

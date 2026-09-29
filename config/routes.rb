@@ -37,6 +37,10 @@ Rails.application.routes.draw do
       end
     end
     resources :templates, only: %i[update show index destroy] do
+      collection do
+        post :pdf, to: 'templates_from_file#pdf'
+        post :docx, to: 'templates_from_file#docx'
+      end
       resources :clone, only: %i[create], controller: 'templates_clone'
       resources :submissions, only: %i[index create]
     end
