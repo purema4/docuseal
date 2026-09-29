@@ -47,6 +47,12 @@ curl -X POST https://your-docuseal/api/templates/pdf \
 `file` accepts base64 (optionally as a `data:` URI), a public `https://` URL, or a multipart upload.
 Sending an `external_id` that already exists in the account replaces the documents and fields of that template.
 
+## MCP
+
+The MCP `create_template` tool uses the same processing: pass an HTTPS `url` of a PDF or DOCX file and its
+`{{tags}}` become fields. The file is downloaded with the same SSRF protections and limits, and the tool result
+lists the created roles and fields. Images are still accepted and create a template without fields.
+
 ## Requirements
 
 DOCX conversion runs LibreOffice (`soffice`). The Docker image installs it by default
