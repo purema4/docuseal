@@ -7,6 +7,8 @@ on:
 
 jobs:
   build:
+    # Publishes the official docuseal/docuseal image on Docker Hub; forks use publish-image.yml instead.
+    if: github.repository == 'docusealco/docuseal'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
 
