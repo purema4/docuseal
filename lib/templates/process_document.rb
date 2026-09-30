@@ -90,23 +90,31 @@ module Templates
 
       pool = Concurrent::FixedThreadPool.new(concurrency)
 
-      promises =
-        range.map do |page_number|
-          doc_page = doc.get_page(page_number)
+      promises = []
+      blobs = []
 
-          hide_placeholder_widgets(doc_page, hide_empty: !flatten_pages)
-          doc_page.flatten if flatten_pages
+      range.each do |page_number|
+        # A rendered page is a full-size bitmap (~11MB), so render the next page only when an upload
+        # slot is free instead of holding every page of the document in memory at once.
+        blobs << promises.shift.value! if promises.size >= concurrency
 
-          bytes, width, height = doc_page.render_to_bitmap(width: MAX_WIDTH)
+        doc_page = doc.get_page(page_number)
 
-          image = Vips::Image.new_from_memory_copy(bytes, width, height, 4, :uchar)
+        hide_placeholder_widgets(doc_page, hide_empty: !flatten_pages)
+        doc_page.flatten if flatten_pages
 
-          Concurrent::Promise.execute(executor: pool) { build_and_upload_blob(image, page_number) }
-        ensure
-          doc_page&.close
-        end
+        bytes, width, height = doc_page.render_to_bitmap(width: MAX_WIDTH)
 
-      Concurrent::Promise.zip(*promises).value!.each do |blob|
+        image = Vips::Image.new_from_memory_copy(bytes, width, height, 4, :uchar)
+
+        promises << Concurrent::Promise.execute(executor: pool) { build_and_upload_blob(image, page_number) }
+      ensure
+        doc_page&.close
+      end
+
+      blobs.concat(promises.map(&:value!))
+
+      blobs.each do |blob|
         next unless blob
 
         ApplicationRecord.no_touching do
