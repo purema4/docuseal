@@ -190,12 +190,22 @@ module Templates
 
         field['type'] ||= 'text'
 
+        normalize_date_signed_field(field) if field['type'] == 'datenow'
+
         field['submitter_uuid'] = template.submitters.find { |s| s['name'] == role }['uuid']
       end
 
       fields = ProcessDocument.normalize_attachment_fields(template, attachments) if fields.empty?
 
       template.fields = fields
+    end
+
+    # 'datenow' is the builder's "Date signed" shortcut, not a stored field type: like the builder, store it
+    # as a read-only date that is filled with the signing date.
+    def normalize_date_signed_field(field)
+      field['type'] = 'date'
+      field['readonly'] = true
+      field['default_value'] = '{{date}}'
     end
 
     # Fields with the same name and role are merged, so a tag repeated on several pages or a

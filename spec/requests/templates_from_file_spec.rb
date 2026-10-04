@@ -132,6 +132,21 @@ describe 'Templates from file API' do
       expect(template.fields.first['submitter_uuid']).to eq(template.submitters.first['uuid'])
     end
 
+    it 'stores datenow fields as read-only dates filled with the signing date' do
+      pdf = build_pdf([['Signed on: {{Signing Date;type=datenow;role=Buyer}}']])
+
+      post_pdf({ documents: [{ file: Base64.strict_encode64(pdf),
+                               fields: [{ name: 'Seller Date', type: 'datenow', role: 'Seller',
+                                          areas: [{ x: 0.1, y: 0.5, w: 0.2, h: 0.04 }] }] }] })
+
+      expect(response).to have_http_status(:ok)
+
+      fields = Template.last.fields.index_by { |f| f['name'] }
+
+      expect(fields['Signing Date']).to include('type' => 'date', 'readonly' => true, 'default_value' => '{{date}}')
+      expect(fields['Seller Date']).to include('type' => 'date', 'readonly' => true, 'default_value' => '{{date}}')
+    end
+
     it 'merges fields param into tags with the same name and role' do
       post_pdf({
                  documents: [{
