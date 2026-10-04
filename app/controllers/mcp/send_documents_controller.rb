@@ -54,6 +54,17 @@ module Mcp
                 }
               }
             }
+          },
+          send_email: {
+            type: 'boolean',
+            description: 'Set to false to not email signature requests; share the returned signing urls instead. ' \
+                         'Defaults to true'
+          },
+          order: {
+            type: 'string',
+            enum: %w[preserved random],
+            description: 'preserved: submitters sign one after another in the template roles order, ' \
+                         'random: all submitters can sign at once. Defaults to the template setting'
           }
         },
         required: %w[template_id submitters]
@@ -96,9 +107,10 @@ module Mcp
         template: @template,
         user: current_user,
         source: :mcp,
-        submitters_order: @template.preferences['submitters_order'].presence || 'random',
+        submitters_order: mcp_params['order'].presence_in(%w[preserved random]) ||
+                          @template.preferences['submitters_order'].presence || 'random',
         submissions_attrs: { submitters: },
-        params: { 'send_email' => true, 'submitters' => submitters }
+        params: { 'send_email' => !mcp_params['send_email'].in?([false, 'false']), 'submitters' => submitters }
       )
 
       return render_tool_error('No valid submitters provided') if submissions.blank?
@@ -111,7 +123,16 @@ module Mcp
 
       submission = submissions.first
 
-      render_tool_result(id: submission.id, status: 'pending')
+      roles = submission.template_submitters.to_h { |s| [s['uuid'], s['name']] }
+
+      render_tool_result(
+        id: submission.id,
+        status: 'pending',
+        submitters_order: submission.submitters_order,
+        submitters: submission.submitters.map do |submitter|
+          { role: roles[submitter.uuid], email: submitter.email, url: submit_form_url(slug: submitter.slug) }
+        end
+      )
     rescue Submissions::CreateFromSubmitters::BaseError => e
       render_tool_error(e.message)
     end
