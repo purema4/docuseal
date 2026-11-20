@@ -25,5 +25,7 @@ class SubmissionsExportController < ApplicationController
     end
   end
 
-  def new; end
+  def new
+    render layout: 'plain'
+  end
 end

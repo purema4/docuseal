@@ -11,7 +11,8 @@
 <% with_timestamp_seconds = configs.find { |e| e.key == AccountConfig::WITH_TIMESTAMP_SECONDS_KEY }&.value == true %>
 <% with_signature_id_reason = configs.find { |e| e.key == AccountConfig::WITH_SIGNATURE_ID_REASON_KEY }&.value != false %>
 <% with_signature_id_completed_at = configs.find { |e| e.key == AccountConfig::WITH_SIGNATURE_ID_COMPLETED_AT_KEY }&.value == true %>
-<main style="max-width: 1600px" class="mx-auto pl-4">
+<% is_generating = @submission.variables_schema.present? && @submission.template_schema.to_a.any? { |item| item['dynamic'] && @submission.schema_documents.none? { |e| e.uuid == item['attachment_uuid'] } } %>
+<div style="max-width: 1600px" class="mx-auto pl-4">
   <% unless native_tab == 'recipients' %>
     <div class="flex justify-between items-center pr-4 sticky top-0 md:relative z-10 bg-base-100 <%= 'py-1.5' unless turbo_native_app? %>">
       <% unless turbo_native_app? %>
@@ -19,6 +20,12 @@
           <span><%= render 'submissions/logo' %></span>
           <h1 class="text-xl md:text-3xl font-semibold focus:text-clip" style="overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;"><% (@submission.name || @submission.template&.name).to_s.split(/(_)/).each do |item| %><%= item %><wbr><% end %></h1>
         </a>
+      <% end %>
+      <% if is_generating %>
+        <div class="alert py-2" style="width: fit-content; position: absolute; left: 50%; transform: translateX(-50%)">
+          <%= svg_icon('info_circle', class: 'w-6 h-6') %>
+          <span><%= t('this_document_is_being_processed_refresh_the_page_to_view_the_final_version') %></span>
+        </div>
       <% end %>
       <div class="flex items-center gap-3">
         <% if signed_in? && can?(:destroy, @submission) && @submission.archived_at? && !@submission.completed_at? %>
@@ -33,7 +40,7 @@
               <span class="hidden md:inline"><%= t('audit_log') %></span>
             </a>
           </native-action>
-        <% elsif signed_in? %>
+        <% elsif signed_in? && !is_generating %>
           <native-action data-label="<%= t('event_log') %>" data-icon="logs">
             <open-modal-mobile class="flex">
               <%= link_to submission_events_path(@submission), class: 'white-button', data: { turbo_frame: :modal } do %>
@@ -54,7 +61,8 @@
         <% if @submission.submitters.to_a.any?(&:completed_at?) %>
           <% show_combined_download = @submission.completed_at? && !is_combined_enabled %>
           <% show_unarchive = signed_in? && can?(:destroy, @submission) && @submission.archived_at? && @submission.completed_at? %>
-          <% show_download_dropdown = show_combined_download || show_unarchive %>
+          <% show_event_log_download = signed_in? && can?(:manage, :event_log_download) && can?(:read, @submission) %>
+          <% show_download_dropdown = show_combined_download || show_event_log_download || show_unarchive %>
           <% if @submission.completed_at? || !is_combined_enabled %>
             <div class="join relative">
               <native-action data-label="<%= t('download') %>" data-icon="download">
@@ -95,6 +103,9 @@
                         </li>
                       </native-action>
                     <% end %>
+                    <% if show_event_log_download %>
+                      <%= render 'submissions/download_event_log' %>
+                    <% end %>
                     <% if show_unarchive %>
                       <native-action data-label="<%= t('unarchive') %>" data-icon="rotate" data-section="archive">
                         <li>
@@ -110,7 +121,7 @@
               <% end %>
             </div>
           <% end %>
-        <% elsif @submission.submitters.to_a.size == 1 && !@submission.expired? && !@submission.submitters.to_a.first.declined_at? && !@submission.archived_at? && !@submission.template&.archived_at? %>
+        <% elsif !is_generating && @submission.submitters.to_a.size == 1 && !@submission.expired? && !@submission.submitters.to_a.first.declined_at? && !@submission.archived_at? && !@submission.template&.archived_at? %>
           <native-action data-label="<%= t('share_link') %>" data-icon="link">
             <%= render 'shared/clipboard_copy', text: submit_form_url(slug: @submission.submitters.to_a.first.slug, host: form_link_host), class: 'base-button', icon_class: 'w-6 h-6 text-white', copy_title: t('copy_share_link'), copied_title: t('copied_to_clipboard') %>
           </native-action>
@@ -124,15 +135,17 @@
     <% attachments_index = ActiveStorage::Attachment.where(record: @submission.submitters, name: :attachments).preload(:blob).index_by(&:uuid) %>
     <% unless native_tab == 'recipients' %>
       <% schema = Submissions.filtered_conditions_schema(@submission, values:) %>
+      <% template_documents_index = is_generating ? @submission.template.dynamic_documents.preload(current_version: { document_attachment: [:blob, { preview_images_attachments: :blob }] }).filter_map { |e| e.current_version&.document_attachment }.index_by(&:uuid) : {} %>
+      <% schema = schema.select { |item| !item['dynamic'] || template_documents_index[item['attachment_uuid']] || @submission.schema_documents.any? { |e| e.uuid == item['attachment_uuid'] } } if is_generating %>
       <% unless turbo_native_app? %>
         <div class="overflow-y-auto overflow-x-hidden hidden lg:block w-52 flex-none pr-3 mt-0.5 pt-0.5" tabindex="0">
           <% schema.each do |item| %>
-            <% document = @submission.schema_documents.find { |a| item['attachment_uuid'] == a.uuid } %>
+            <% document = @submission.schema_documents.find { |a| item['attachment_uuid'] == a.uuid } || template_documents_index[item['attachment_uuid']] %>
             <% if document.preview_images.first %>
               <scroll-to data-selector-id="page-<%= document.uuid %>-0" class="block cursor-pointer">
-                <img src="<%= (document.preview_images.find { |e| e.filename.base.to_i.zero? } || document.preview_images.first).url(time: service_url_time) %>" width="<%= document.preview_images.first.metadata['width'] %>" height="<%= document.preview_images.first.metadata['height'] %>" class="rounded border" loading="lazy" alt="<%= item['name'].presence || document.filename.base %>">
+                <img src="<%= (document.preview_images.find { |e| e.filename.base.to_i.zero? } || document.preview_images.first).url(time: service_url_time) %>" width="<%= document.preview_images.first.metadata['width'] %>" height="<%= document.preview_images.first.metadata['height'] %>" class="rounded border" loading="lazy" alt="<%= item['name'].presence || FilenameUtils.basename(document.blob[:filename]) %>">
                 <div class="pb-2 pt-1.5 text-center" dir="auto">
-                  <%= item['name'].presence || document.filename.base %>
+                  <%= item['name'].presence || FilenameUtils.basename(document.blob[:filename]) %>
                 </div>
               </scroll-to>
             <% end %>
@@ -147,7 +160,7 @@
           <% page_blob_struct = Struct.new(:url, :metadata) %>
           <% bg_classes = %w[bg-red-100 bg-sky-100 bg-emerald-100 bg-yellow-100 bg-purple-100 bg-pink-100 bg-cyan-100 bg-orange-100 bg-lime-100 bg-indigo-100] %>
           <% schema.each do |item| %>
-            <% document = @submission.schema_documents.find { |e| e.uuid == item['attachment_uuid'] } %>
+            <% document = @submission.schema_documents.find { |e| e.uuid == item['attachment_uuid'] } || template_documents_index[item['attachment_uuid']] %>
             <% document_annots_index = document.metadata.dig('pdf', 'annotations')&.group_by { |e| e['page'] } || {} %>
             <% preview_images_index = document.preview_images.loaded? ? document.preview_images.index_by { |e| e.filename.base.to_i } : {} %>
             <% lazyload_metadata = document.preview_images.first&.metadata || Templates::ProcessDocument::US_LETTER_SIZE %>
@@ -163,6 +176,7 @@
                     <% value = values[field['uuid']].presence || (field['default_value'] != '{{date}}' && field['readonly'] == true && field['conditions'].blank? && field['default_value'].present? ? Submitters::SubmitValues.template_default_value_for_submitter(field['default_value'], @submission.submitters.find { |e| e.uuid == field['submitter_uuid'] }, with_time: false) : nil) %>
                     <% value ||= field['default_value'] if field['type'] == 'heading' %>
                     <% submitter = submitters_index[field['submitter_uuid']] %>
+                    <% value = nil if field['type'] == 'signature' && submitter && !submitter.completed_at? %>
                     <% if value.present? %>
                       <% if (mask = field.dig('preferences', 'mask').presence) && signed_in? && can?(:read, @submission) %>
                         <span class="group">
@@ -222,39 +236,39 @@
               </div>
               <% if submitter&.name.present? %>
                 <div class="flex items-center space-x-1 mt-1">
-                  <%= svg_icon('user', class: 'w-5 h-5') %>
-                  <span>
+                  <%= svg_icon('user', class: 'w-5 h-5 shrink-0') %>
+                  <span class="truncate">
                     <%= submitter&.name %>
                   </span>
                 </div>
               <% end %>
               <% if submitter&.email.present? %>
                 <div class="flex items-center space-x-1 mt-1">
-                  <%= svg_icon('mail', class: 'w-5 h-5') %>
-                  <span>
+                  <%= svg_icon('mail', class: 'w-5 h-5 shrink-0') %>
+                  <span class="truncate">
                     <%= submitter.email || 'N/A' %>
                   </span>
                 </div>
               <% end %>
               <% if submitter&.phone.present? %>
                 <div class="flex items-center space-x-1 mt-1">
-                  <%= svg_icon('phone', class: 'w-5 h-5') %>
-                  <span>
+                  <%= svg_icon('phone', class: 'w-5 h-5 shrink-0') %>
+                  <span class="truncate">
                     <%= submitter.phone %>
                   </span>
                 </div>
               <% end %>
               <div class="flex items-center space-x-1 mt-1">
                 <% if submitter&.viewer? %>
-                  <%= svg_icon(submitter.opened_at? ? 'file_check' : 'file_unknown', class: 'w-5 h-5') %>
+                  <%= svg_icon(submitter.opened_at? ? 'file_check' : 'file_unknown', class: 'w-5 h-5 shrink-0') %>
                 <% elsif submitter && !submitter.completed_at? && @submission.completed_at? %>
-                  <%= svg_icon('writing_off', class: 'w-5 h-5') %>
+                  <%= svg_icon('writing_off', class: 'w-5 h-5 shrink-0') %>
                 <% elsif @submission.expire_at? && submitter && !submitter.completed_at? %>
-                  <%= svg_icon('clock_exclamation', class: 'w-5 h-5') %>
+                  <%= svg_icon('clock_exclamation', class: 'w-5 h-5 shrink-0') %>
                 <% else %>
-                  <%= svg_icon('writing', class: 'w-5 h-5') %>
+                  <%= svg_icon('writing', class: 'w-5 h-5 shrink-0') %>
                 <% end %>
-                <span>
+                <span class="truncate">
                   <% if submitter&.declined_at? %>
                     <%= t('declined_on_time', time: l(submitter.declined_at.in_time_zone(@submission.account.timezone), format: :short, locale: @submission.account.locale)) %>
                   <% elsif submitter&.viewer? %>
@@ -320,6 +334,7 @@
               <% value = values[field['uuid']].presence || (field['default_value'] != '{{date}}' && field['readonly'] == true && field['default_value'].present? ? Submitters::SubmitValues.template_default_value_for_submitter(field['default_value'], @submission.submitters.find { |e| e.uuid == field['submitter_uuid'] }, with_time: false) : nil) %>
               <% next if value.blank? %>
               <% next if field['type'] == 'heading' || field['type'] == 'strikethrough' %>
+              <% next if field['type'] == 'signature' && submitter && !submitter.completed_at? %>
               <div class="pt-2.5 border-b border-base-300">
                 <div class="text-xs font-medium uppercase mb-0.5" dir="auto">
                   <%= field['name'].presence || "#{t("#{field['type']}_field")} #{submitter_field_counters[field['type']]}" %>
@@ -388,7 +403,7 @@
       </label>
     </toggle-visible>
   <% end %>
-</main>
+</div>
 <% unless request.headers['HTTP_X_TURBO_REQUEST_ID'] %>
   <%= render 'scripts/autosize_field' %>
 <% end %>

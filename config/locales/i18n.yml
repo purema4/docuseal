@@ -624,6 +624,7 @@ en: &en
   form_has_been_declined: Form has been declined.
   form_is_view_only: Form is view only.
   file_is_missing: File is missing
+  file_is_not_an_image: File is not an image
   folder_name_has_been_updated: Folder name has been updated.
   unable_to_rename_folder: Unable to rename folder.
   template_has_been_removed: Template has been removed.
@@ -655,6 +656,7 @@ en: &en
   hmac_signing_secret: HMAC Signing Secret
   hmac_signature_header_hint_html: 'Each request is signed with the %{header} header: &lt;timestamp&gt;.&lt;sha256&gt;.'
   count_submissions_have_been_created: '%{count} submissions have been created.'
+  this_document_is_being_processed_refresh_the_page_to_view_the_final_version: "This document is being processed. Refresh the page to view the final version."
   sms_length_cant_be_longer_than_120_bytes: SMS length can't be longer than 120 bytes
   connected_successfully: Connected successfully.
   user_nameid_not_found: 'User %{nameid} not found.'
@@ -683,7 +685,7 @@ en: &en
   thirty_days: 30 days
   free: Free
   unlimited_documents_storage: Unlimited documents storage
-  users_management: Users management
+  user_management: User management
   ten_field_types: 10 field types
   multiple_signers: Multiple signers
   automatic_esignature: Automatic eSignature
@@ -703,6 +705,7 @@ en: &en
   developer_sandbox: Developer Sandbox.
   upgrade_to_start_using_in_production_html: '<a href="%{url}" target="_blank" class="link font-semibold">Upgrade</a> to start using in Production.'
   download_combined_pdf: Download combined PDF
+  download_event_log: Download Event Log
   audit_log: Audit Log
   signers: Signers
   not_invited_yet:  Not invited yet
@@ -714,7 +717,7 @@ en: &en
   declined_on_time: 'Declined on %{time}'
   expire_on_time: 'Expire on %{time}'
   sign_in_person: Sign In-person
-  create_a_new_template_document_form_or_submit_the_existing_one_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Create a new template</a> document form or <a href="%{start_form_link}" target="_blank" class="inline underline font-medium">submit the existing one</a>
+  create_a_new_template_document_form_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Create a new template</a> document form
   send_email_copy_with_completed_documents_to_a_specified_bcc_address: Send email copy with completed documents to a specified BCC address.
   re_send_email: Re-send Email
   re_send_emails: Re-send Emails
@@ -828,9 +831,14 @@ en: &en
   click_here_to_update_your_payment_details_and_clear_the_invoice_to_ensure_uninterrupted_service_html: <a href="%{url}" class="link">Click here</a> to update your payment details and clear the invoice to ensure uninterrupted service.
   overdue_payment: Overdue Payment
   your_pro_plan_has_been_suspended_due_to_unpaid_invoices_you_can_update_your_payment_details_to_settle_the_invoice_and_continue_using_docuseal_or_cancel_your_subscription: Your Pro Plan has been suspended due to unpaid invoices. You can update your payment details to settle the invoice and continue using DocuSeal or cancel your subscription.
+  get_the_docuseal_app_for_a_better_mobile_experience: Get the DocuSeal app for a better mobile experience.
+  install_app: Install app
   manage_subscription: Manage Subscription
   docuseal_version_security_release_is_available: "DocuSeal v%{version} security release is available."
   click_here_to_view_the_instructions_and_update_your_app_html: '<a href="%{url}" class="link" target="_blank" rel="noopener noreferrer nofollow">Click here</a> to view the instructions and update your app.'
+  your_pro_subscription_includes_count_user_seats_but_there_are_users_active_users_in_your_account_html:
+    one: 'Your Pro subscription includes <b>%{count}</b> user seat, but there are <b>%{users}</b> active users in your account.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Upgrade</a> your plan to cover <b>%{users}</b> users or remove inactive users via <a href="%{settings_url}" class="link font-bold">Settings</a>.'
+    other: 'Your Pro subscription includes <b>%{count}</b> user seats, but there are <b>%{users}</b> active users in your account.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Upgrade</a> your plan to cover <b>%{users}</b> users or remove inactive users via <a href="%{settings_url}" class="link font-bold">Settings</a>.'
   submission_created_by_email_html: '<b>Submission created</b> by %{email}'
   submission_created_by_email_via_source_html: '<b>Submission created</b> by %{email} via %{source}'
   submission_created_via_source_html: '<b>Submission created</b> via %{source}'
@@ -1026,6 +1034,8 @@ en: &en
   failed_to_scan_the_document: Failed to scan the document
   document_scanning_is_not_available_on_this_device: Document scanning is not available on this device
   click_to_upload: Click to upload
+  cc_view_only: CC View-only
+  bcc_completed: BCC Completed
   devise:
     confirmations:
       confirmed: Your email address has been successfully confirmed.
@@ -1042,10 +1052,12 @@ en: &en
     link: Link
     mcp: MCP
     self: Sign Yourself
+  error: Error
   submission_event_names:
     send_email_to_html: '<b>Email sent</b> to %{submitter_name}'
     bounce_email_html: '<b>Email bounced</b> %{submitter_name}'
     complaint_email_html: '<b>Spam complaint</b> %{submitter_name}'
+    fail_sms_to_html: '<b>SMS failed</b> to %{submitter_name}'
     send_reminder_email_to_html: '<b>Reminder email sent</b> to %{submitter_name}'
     send_sms_to_html: '<b>SMS sent</b> to %{submitter_name}'
     send_2fa_sms_to_html: '<b>Verification SMS sent</b> to %{submitter_name}'
@@ -1076,6 +1088,8 @@ en: &en
     select_field: Select Field
     select_column: Select Column
     new_field_mapping: New Field Mapping
+    add_mapping: Add Mapping
+    variables: Variables
     total_entries: Total entries
     upload_csv_or_xlsx_spreadsheet: Upload CSV or XLSX Spreadsheet
     click_to_upload: Click to Upload
@@ -1781,6 +1795,7 @@ es: &es
   form_has_been_declined: El formulario ha sido rechazado.
   form_is_view_only: El formulario es de solo lectura.
   file_is_missing: Falta el archivo
+  file_is_not_an_image: El archivo no es una imagen
   folder_name_has_been_updated: El nombre de la carpeta ha sido actualizado.
   unable_to_rename_folder: No se pudo renombrar la carpeta.
   template_has_been_removed: La plantilla ha sido eliminada.
@@ -1812,6 +1827,7 @@ es: &es
   hmac_signing_secret: Secreto de firma HMAC
   hmac_signature_header_hint_html: 'Cada solicitud se firma con el encabezado %{header}: &lt;timestamp&gt;.&lt;sha256&gt;.'
   count_submissions_have_been_created: '%{count} envíos han sido creados.'
+  this_document_is_being_processed_refresh_the_page_to_view_the_final_version: "Este documento se está procesando. Actualiza la página para ver la versión final."
   sms_length_cant_be_longer_than_120_bytes: La longitud del SMS no puede ser mayor a 120 bytes.
   connected_successfully: Conectado con éxito.
   user_nameid_not_found: 'Usuario %{nameid} no encontrado.'
@@ -1840,7 +1856,7 @@ es: &es
   thirty_days: 30 días
   free: Gratis
   unlimited_documents_storage: Almacenamiento ilimitado
-  users_management: Gestión de usuarios
+  user_management: Gestión de usuarios
   ten_field_types: 10 tipos de campos
   multiple_signers: Múltiples firmantes
   automatic_esignature: Firma electrónica automática
@@ -1860,6 +1876,7 @@ es: &es
   developer_sandbox: Sandbox para desarrolladores.
   upgrade_to_start_using_in_production_html: '<a href="%{url}" target="_blank" class="link font-semibold">Actualiza</a> para empezar a usar en Producción.'
   download_combined_pdf: Descargar PDF combinado
+  download_event_log: Descargar registro de eventos
   audit_log: Registro de Auditoría
   signers: Firmantes
   not_invited_yet: Aún no invitado
@@ -1871,7 +1888,7 @@ es: &es
   declined_on_time: 'Rechazado el %{time}'
   expire_on_time: 'Expira el %{time}'
   sign_in_person: Firma en persona
-  create_a_new_template_document_form_or_submit_the_existing_one_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Crear una nueva plantilla</a> de documento o <a href="%{start_form_link}" target="_blank" class="inline underline font-medium">enviar el existente</a>
+  create_a_new_template_document_form_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Crear una nueva plantilla</a> de documento
   send_email_copy_with_completed_documents_to_a_specified_bcc_address: Enviar una copia del correo electrónico con los documentos completados a una dirección BCC especificada.
   re_send_email: Reenviar email
   re_send_emails: Reenviar emails
@@ -1982,9 +1999,14 @@ es: &es
   click_here_to_update_your_payment_details_and_clear_the_invoice_to_ensure_uninterrupted_service_html: '<a href="%{url}" class="link">Haz clic aquí</a> para actualizar tus datos de pago y liquidar la factura para garantizar un servicio ininterrumpido.'
   overdue_payment: Pago Atrasado
   your_pro_plan_has_been_suspended_due_to_unpaid_invoices_you_can_update_your_payment_details_to_settle_the_invoice_and_continue_using_docuseal_or_cancel_your_subscription: Tu plan Pro ha sido suspendido debido a facturas impagas. Puedes actualizar tus datos de pago para liquidar la factura y seguir usando DocuSeal o cancelar tu suscripción.
+  get_the_docuseal_app_for_a_better_mobile_experience: Descarga la app de DocuSeal para una mejor experiencia móvil.
+  install_app: Instalar app
   manage_subscription: Gestionar Suscripción
   docuseal_version_security_release_is_available: "La versión de seguridad DocuSeal v%{version} está disponible."
   click_here_to_view_the_instructions_and_update_your_app_html: '<a href="%{url}" class="link" target="_blank" rel="noopener noreferrer nofollow">Haz clic aquí</a> para ver las instrucciones y actualizar tu aplicación.'
+  your_pro_subscription_includes_count_user_seats_but_there_are_users_active_users_in_your_account_html:
+    one: 'Tu suscripción Pro incluye <b>%{count}</b> plaza de usuario, pero hay <b>%{users}</b> usuarios activos en tu cuenta.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Amplía</a> tu plan para cubrir <b>%{users}</b> usuarios o elimina los usuarios inactivos en la <a href="%{settings_url}" class="link font-bold">Configuración</a>.'
+    other: 'Tu suscripción Pro incluye <b>%{count}</b> plazas de usuario, pero hay <b>%{users}</b> usuarios activos en tu cuenta.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Amplía</a> tu plan para cubrir <b>%{users}</b> usuarios o elimina los usuarios inactivos en la <a href="%{settings_url}" class="link font-bold">Configuración</a>.'
   submission_created_by_email_html: '<b>Envío creado</b> por %{email}'
   submission_created_by_email_via_source_html: '<b>Envío creado</b> por %{email} a través de %{source}'
   submission_created_via_source_html: '<b>Envío creado</b> a través de %{source}'
@@ -2172,6 +2194,8 @@ es: &es
   failed_to_save_the_scan: No se pudo guardar el escaneo
   failed_to_scan_the_document: No se pudo escanear el documento
   document_scanning_is_not_available_on_this_device: El escaneo de documentos no está disponible en este dispositivo
+  cc_view_only: CC Solo lectura
+  bcc_completed: CCO Completado
   devise:
     confirmations:
       confirmed: Tu dirección de correo electrónico ha sido confirmada correctamente.
@@ -2188,10 +2212,12 @@ es: &es
     link: Enlace
     mcp: MCP
     self: Firma tú mismo
+  error: Error
   submission_event_names:
     send_email_to_html: '<b>Correo electrónico enviado</b> a %{submitter_name}'
     bounce_email_html: '<b>Correo electrónico rebotado</b> %{submitter_name}'
     complaint_email_html: '<b>Queja de spam</b> %{submitter_name}'
+    fail_sms_to_html: '<b>SMS fallido</b> a %{submitter_name}'
     send_reminder_email_to_html: '<b>Correo de recordatorio enviado</b> a %{submitter_name}'
     send_sms_to_html: '<b>SMS enviado</b> a %{submitter_name}'
     send_2fa_sms_to_html: '<b>SMS de verificación enviado</b> a %{submitter_name}'
@@ -2222,6 +2248,8 @@ es: &es
     select_field: Seleccionar campo
     select_column: Seleccionar columna
     new_field_mapping: Nuevo mapeo de campo
+    add_mapping: Agregar mapeo
+    variables: Variables
     total_entries: Entradas totales
     upload_csv_or_xlsx_spreadsheet: Subir hoja de cálculo CSV o XLSX
     click_to_upload: Haz clic para subir
@@ -2941,6 +2969,7 @@ it: &it
   form_has_been_declined: Il modulo è stato rifiutato.
   form_is_view_only: Il modulo è di sola lettura.
   file_is_missing: File mancante
+  file_is_not_an_image: Il file non è un'immagine
   folder_name_has_been_updated: Il nome della cartella è stato aggiornato.
   unable_to_rename_folder: Impossibile rinominare la cartella.
   template_has_been_removed: Il modello è stato rimosso.
@@ -2972,6 +3001,7 @@ it: &it
   hmac_signing_secret: Segreto di firma HMAC
   hmac_signature_header_hint_html: 'Ogni richiesta viene firmata con l''intestazione %{header}: &lt;timestamp&gt;.&lt;sha256&gt;.'
   count_submissions_have_been_created: '%{count} invii sono stati creati.'
+  this_document_is_being_processed_refresh_the_page_to_view_the_final_version: "Questo documento è in fase di elaborazione. Aggiorna la pagina per visualizzare la versione finale."
   sms_length_cant_be_longer_than_120_bytes: "La lunghezza dell'SMS non può superare i 120 byte."
   connected_successfully: Collegamento avvenuto con successo.
   user_nameid_not_found: 'Utente %{nameid} non trovato.'
@@ -3000,7 +3030,7 @@ it: &it
   thirty_days: 30 giorni
   free: Gratuito
   unlimited_documents_storage: Archiviazione illimitata di documenti
-  users_management: Gestione utenti
+  user_management: Gestione utenti
   ten_field_types: 10 tipi di campi
   multiple_signers: Firmatari multipli
   automatic_esignature: Firma elettronica automatica
@@ -3020,6 +3050,7 @@ it: &it
   developer_sandbox: Sandbox per sviluppatori
   upgrade_to_start_using_in_production_html: '<a href="%{url}" target="_blank" class="link font-semibold">Aggiorna</a> per iniziare a usare in produzione.'
   download_combined_pdf: Scarica PDF combinato
+  download_event_log: Scarica registro degli eventi
   audit_log: Registro di audit
   signers: Firmatari
   not_invited_yet: Non ancora invitato
@@ -3031,7 +3062,7 @@ it: &it
   declined_on_time: 'Rifiutato il %{time}'
   expire_on_time: 'Scade il %{time}'
   sign_in_person: Firma di persona
-  create_a_new_template_document_form_or_submit_the_existing_one_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Crea un nuovo modello</a> di documento o <a href="%{start_form_link}" target="_blank" class="inline underline font-medium">invia quello esistente</a>
+  create_a_new_template_document_form_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Crea un nuovo modello</a> di documento
   send_email_copy_with_completed_documents_to_a_specified_bcc_address: Invia una copia dell'email con i documenti completati a un indirizzo BCC specificato.
   re_send_email: Reinvia email
   re_send_emails: Reinvia le email
@@ -3142,9 +3173,14 @@ it: &it
   click_here_to_update_your_payment_details_and_clear_the_invoice_to_ensure_uninterrupted_service_html: '<a href="%{url}" class="link">Fai clic qui</a> per aggiornare i tuoi dati di pagamento e saldare la fattura per garantire un servizio ininterrotto.'
   overdue_payment: Pagamento Scaduto
   your_pro_plan_has_been_suspended_due_to_unpaid_invoices_you_can_update_your_payment_details_to_settle_the_invoice_and_continue_using_docuseal_or_cancel_your_subscription: Il tuo piano Pro è stato sospeso a causa di fatture non pagate. Puoi aggiornare i tuoi dati di pagamento per saldare la fattura e continuare a utilizzare DocuSeal o annullare l'abbonamento.
+  get_the_docuseal_app_for_a_better_mobile_experience: Scarica l'app DocuSeal per un'esperienza mobile migliore.
+  install_app: Installa app
   manage_subscription: Gestisci Abbonamento
   docuseal_version_security_release_is_available: "È disponibile il rilascio di sicurezza DocuSeal v%{version}."
   click_here_to_view_the_instructions_and_update_your_app_html: '<a href="%{url}" class="link" target="_blank" rel="noopener noreferrer nofollow">Fai clic qui</a> per vedere le istruzioni e aggiornare la tua app.'
+  your_pro_subscription_includes_count_user_seats_but_there_are_users_active_users_in_your_account_html:
+    one: 'Il tuo abbonamento Pro include <b>%{count}</b> posto utente, ma nel tuo account ci sono <b>%{users}</b> utenti attivi.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Aggiorna</a> il tuo piano per coprire <b>%{users}</b> utenti oppure rimuovi gli utenti inattivi dalle <a href="%{settings_url}" class="link font-bold">Impostazioni</a>.'
+    other: 'Il tuo abbonamento Pro include <b>%{count}</b> posti utente, ma nel tuo account ci sono <b>%{users}</b> utenti attivi.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Aggiorna</a> il tuo piano per coprire <b>%{users}</b> utenti oppure rimuovi gli utenti inattivi dalle <a href="%{settings_url}" class="link font-bold">Impostazioni</a>.'
   submission_created_by_email_html: '<b>Invio creato</b> da %{email}'
   submission_created_by_email_via_source_html: '<b>Invio creato</b> da %{email} tramite %{source}'
   submission_created_via_source_html: '<b>Invio creato</b> tramite %{source}'
@@ -3332,6 +3368,8 @@ it: &it
   failed_to_save_the_scan: Impossibile salvare la scansione
   failed_to_scan_the_document: Impossibile scansionare il documento
   document_scanning_is_not_available_on_this_device: La scansione dei documenti non è disponibile su questo dispositivo
+  cc_view_only: CC Sola lettura
+  bcc_completed: BCC Completato
   devise:
     confirmations:
       confirmed: Il tuo indirizzo email è stato confermato con successo.
@@ -3348,10 +3386,12 @@ it: &it
     link: Link
     mcp: MCP
     self: Firma te stesso
+  error: Errore
   submission_event_names:
     send_email_to_html: '<b>Email inviata</b> a %{submitter_name}'
     bounce_email_html: '<b>Email respinta</b> %{submitter_name}'
     complaint_email_html: '<b>Segnalazione spam</b> %{submitter_name}'
+    fail_sms_to_html: '<b>SMS non consegnato</b> a %{submitter_name}'
     send_reminder_email_to_html: '<b>E-mail di promemoria inviata</b> a %{submitter_name}'
     send_sms_to_html: '<b>SMS inviato</b> a %{submitter_name}'
     send_2fa_sms_to_html: '<b>SMS di verifica inviato</b> a %{submitter_name}'
@@ -3382,6 +3422,8 @@ it: &it
     select_field: Seleziona campo
     select_column: Seleziona colonna
     new_field_mapping: Nuova mappatura del campo
+    add_mapping: Aggiungi mappatura
+    variables: Variabili
     total_entries: Voci totali
     upload_csv_or_xlsx_spreadsheet: Carica un foglio di calcolo CSV o XLSX
     click_to_upload: Clicca per caricare
@@ -4087,6 +4129,7 @@ fr: &fr
   form_has_been_declined: Le formulaire a été refusé.
   form_is_view_only: Le formulaire est en lecture seule.
   file_is_missing: Fichier manquant
+  file_is_not_an_image: Le fichier n'est pas une image
   folder_name_has_been_updated: Le nom du dossier a été mis à jour.
   unable_to_rename_folder: Impossible de renommer le dossier.
   template_has_been_removed: Le modèle a été supprimé.
@@ -4118,6 +4161,7 @@ fr: &fr
   hmac_signing_secret: Secret de signature HMAC
   hmac_signature_header_hint_html: 'Chaque requête est signée avec l''en-tête %{header} : &lt;timestamp&gt;.&lt;sha256&gt;.'
   count_submissions_have_been_created: "%{count} soumissions ont été créées."
+  this_document_is_being_processed_refresh_the_page_to_view_the_final_version: "Ce document est en cours de traitement. Actualisez la page pour afficher la version finale."
   sms_length_cant_be_longer_than_120_bytes: La longueur du SMS ne peut pas dépasser 120 octets
   connected_successfully: Connecté avec succès.
   user_nameid_not_found: Utilisateur %{nameid} introuvable.
@@ -4146,7 +4190,7 @@ fr: &fr
   thirty_days: 30 jours
   free: Gratuit
   unlimited_documents_storage: Stockage de documents illimité
-  users_management: Gestion des utilisateurs
+  user_management: Gestion des utilisateurs
   ten_field_types: 10 types de champs
   multiple_signers: Plusieurs signataires
   automatic_esignature: Signature électronique automatique
@@ -4166,6 +4210,7 @@ fr: &fr
   developer_sandbox: Bac à sable développeur.
   upgrade_to_start_using_in_production_html: <a href="%{url}" target="_blank" class="link font-semibold">Mettez à niveau</a> pour commencer à utiliser en production.
   download_combined_pdf: Télécharger le PDF combiné
+  download_event_log: Télécharger le journal des événements
   audit_log: Journal d’audit
   signers: Signataires
   not_invited_yet: Pas encore invité
@@ -4177,7 +4222,7 @@ fr: &fr
   declined_on_time: Refusé le %{time}
   expire_on_time: Expire le %{time}
   sign_in_person: Signer en personne
-  create_a_new_template_document_form_or_submit_the_existing_one_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Créez un nouveau modèle</a> de document ou <a href="%{start_form_link}" target="_blank" class="inline underline font-medium">soumettez l’existant</a>
+  create_a_new_template_document_form_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Créez un nouveau modèle</a> de document
   send_email_copy_with_completed_documents_to_a_specified_bcc_address: Envoyer une copie e‑mail avec les documents complétés à une adresse Cci spécifiée.
   re_send_email: Renvoyer l’e‑mail
   re_send_emails: Renvoyer e‑mails
@@ -4288,9 +4333,14 @@ fr: &fr
   click_here_to_update_your_payment_details_and_clear_the_invoice_to_ensure_uninterrupted_service_html: <a href="%{url}" class="link">Cliquez ici</a> pour mettre à jour vos informations de paiement et régler la facture afin de garantir la continuité du service.
   overdue_payment: Paiement en retard
   your_pro_plan_has_been_suspended_due_to_unpaid_invoices_you_can_update_your_payment_details_to_settle_the_invoice_and_continue_using_docuseal_or_cancel_your_subscription: "Votre offre Pro a été suspendue en raison de factures impayées.\nVous pouvez mettre à jour vos informations de paiement pour régler la facture et continuer à utiliser DocuSeal, ou annuler votre abonnement."
+  get_the_docuseal_app_for_a_better_mobile_experience: Téléchargez l’application DocuSeal pour une meilleure expérience mobile.
+  install_app: Installer l’application
   manage_subscription: Gérer l’abonnement
   docuseal_version_security_release_is_available: "La mise à jour de sécurité DocuSeal v%{version} est disponible."
   click_here_to_view_the_instructions_and_update_your_app_html: '<a href="%{url}" class="link" target="_blank" rel="noopener noreferrer nofollow">Cliquez ici</a> pour voir les instructions et mettre à jour votre application.'
+  your_pro_subscription_includes_count_user_seats_but_there_are_users_active_users_in_your_account_html:
+    one: 'Votre abonnement Pro inclut <b>%{count}</b> place d’utilisateur, mais votre compte compte <b>%{users}</b> utilisateurs actifs.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Mettez à niveau</a> votre offre pour couvrir <b>%{users}</b> utilisateurs ou supprimez les utilisateurs inactifs dans les <a href="%{settings_url}" class="link font-bold">Paramètres</a>.'
+    other: 'Votre abonnement Pro inclut <b>%{count}</b> places d’utilisateur, mais votre compte compte <b>%{users}</b> utilisateurs actifs.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Mettez à niveau</a> votre offre pour couvrir <b>%{users}</b> utilisateurs ou supprimez les utilisateurs inactifs dans les <a href="%{settings_url}" class="link font-bold">Paramètres</a>.'
   submission_created_by_email_html: "<b>Soumission créée</b> par %{email}"
   submission_created_by_email_via_source_html: "<b>Soumission créée</b> par %{email} via %{source}"
   submission_created_via_source_html: "<b>Soumission créée</b> via %{source}"
@@ -4475,6 +4525,8 @@ fr: &fr
   failed_to_save_the_scan: Impossible d’enregistrer la numérisation
   failed_to_scan_the_document: Impossible de numériser le document
   document_scanning_is_not_available_on_this_device: La numérisation de documents n’est pas disponible sur cet appareil
+  cc_view_only: Cc Lecture seule
+  bcc_completed: Cci Terminé
   devise:
     confirmations:
       confirmed: Votre adresse e-mail a été confirmée avec succès.
@@ -4491,10 +4543,12 @@ fr: &fr
     link: Lien
     mcp: MCP
     self: Signer vous-même
+  error: Erreur
   submission_event_names:
     send_email_to_html: "<b>E‑mail envoyé</b> à %{submitter_name}"
     bounce_email_html: "<b>E‑mail rejeté</b> %{submitter_name}"
     complaint_email_html: "<b>Plainte spam</b> %{submitter_name}"
+    fail_sms_to_html: "<b>SMS non distribué</b> à %{submitter_name}"
     send_reminder_email_to_html: "<b>E‑mail de rappel envoyé</b> à %{submitter_name}"
     send_sms_to_html: "<b>SMS envoyé</b> à %{submitter_name}"
     send_2fa_sms_to_html: "<b>SMS de vérification envoyé</b> à %{submitter_name}"
@@ -4525,6 +4579,8 @@ fr: &fr
     select_field: Sélectionner un champ
     select_column: Sélectionner une colonne
     new_field_mapping: Nouveau mappage de champ
+    add_mapping: Ajouter un mappage
+    variables: Variables
     total_entries: Entrées totales
     upload_csv_or_xlsx_spreadsheet: Téléverser un tableur CSV ou XLSX
     click_to_upload: Cliquer pour téléverser
@@ -5243,6 +5299,7 @@ pt: &pt
   form_has_been_declined: O formulário foi recusado.
   form_is_view_only: O formulário é somente leitura.
   file_is_missing: O arquivo está ausente
+  file_is_not_an_image: O arquivo não é uma imagem
   folder_name_has_been_updated: O nome da pasta foi atualizado.
   unable_to_rename_folder: Não foi possível renomear a pasta.
   template_has_been_removed: O modelo foi removido.
@@ -5274,6 +5331,7 @@ pt: &pt
   hmac_signing_secret: Segredo de assinatura HMAC
   hmac_signature_header_hint_html: 'Cada requisição é assinada com o cabeçalho %{header}: &lt;timestamp&gt;.&lt;sha256&gt;.'
   count_submissions_have_been_created: '%{count} submissões foram criadas.'
+  this_document_is_being_processed_refresh_the_page_to_view_the_final_version: "Este documento está sendo processado. Atualize a página para ver a versão final."
   sms_length_cant_be_longer_than_120_bytes: O comprimento do SMS não pode ultrapassar 120 bytes
   connected_successfully: Conectado com sucesso.
   user_nameid_not_found: 'Usuário %{nameid} não encontrado.'
@@ -5302,7 +5360,7 @@ pt: &pt
   thirty_days: 30 dias
   free: Gratuito
   unlimited_documents_storage: Armazenamento ilimitado
-  users_management: Gerenciamento de usuários
+  user_management: Gerenciamento de usuários
   ten_field_types: 10 tipos de campo
   multiple_signers: Múltiplos signatários
   automatic_esignature: Assinatura eletrônica automática
@@ -5322,6 +5380,7 @@ pt: &pt
   developer_sandbox: Sandbox para desenvolvedores
   upgrade_to_start_using_in_production_html: '<a href="%{url}" target="_blank" class="link font-semibold">Atualizar</a> para começar a usar em produção.'
   download_combined_pdf: Baixar PDF combinado
+  download_event_log: Baixar log de eventos
   audit_log: Log de auditoria
   signers: Signatários
   not_invited_yet: Ainda não convidado
@@ -5333,7 +5392,7 @@ pt: &pt
   declined_on_time: 'Recusado em %{time}'
   expire_on_time: 'Expira em %{time}'
   sign_in_person: Assinar pessoalmente
-  create_a_new_template_document_form_or_submit_the_existing_one_html: '<a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Criar um novo modelo</a> de documento ou <a href="%{start_form_link}" target="_blank" class="inline underline font-medium">submeter o existente</a>'
+  create_a_new_template_document_form_html: '<a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Criar um novo modelo</a> de documento'
   send_email_copy_with_completed_documents_to_a_specified_bcc_address: Envie uma cópia do e-mail com documentos concluídos para um endereço BCC especificado.
   re_send_email: Reenviar e-mail
   re_send_emails: Reenviar e-mails
@@ -5444,9 +5503,14 @@ pt: &pt
   click_here_to_update_your_payment_details_and_clear_the_invoice_to_ensure_uninterrupted_service_html: '<a href="%{url}" class="link">Clique aqui</a> para atualizar seus dados de pagamento e quitar a fatura para garantir um serviço ininterrupto.'
   overdue_payment: Pagamento Atrasado
   your_pro_plan_has_been_suspended_due_to_unpaid_invoices_you_can_update_your_payment_details_to_settle_the_invoice_and_continue_using_docuseal_or_cancel_your_subscription: Seu plano Pro foi suspenso devido a faturas não pagas. Você pode atualizar seus dados de pagamento para quitar a fatura e continuar usando o DocuSeal ou cancelar sua assinatura.
+  get_the_docuseal_app_for_a_better_mobile_experience: Baixe o app DocuSeal para uma melhor experiência no celular.
+  install_app: Instalar app
   manage_subscription: Gerenciar Assinatura
   docuseal_version_security_release_is_available: "A versão de segurança DocuSeal v%{version} está disponível."
   click_here_to_view_the_instructions_and_update_your_app_html: '<a href="%{url}" class="link" target="_blank" rel="noopener noreferrer nofollow">Clique aqui</a> para ver as instruções e atualizar seu aplicativo.'
+  your_pro_subscription_includes_count_user_seats_but_there_are_users_active_users_in_your_account_html:
+    one: 'Sua assinatura Pro inclui <b>%{count}</b> lugar de usuário, mas há <b>%{users}</b> usuários ativos na sua conta.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Atualize</a> seu plano para cobrir <b>%{users}</b> usuários ou remova os usuários inativos nas <a href="%{settings_url}" class="link font-bold">Configurações</a>.'
+    other: 'Sua assinatura Pro inclui <b>%{count}</b> lugares de usuário, mas há <b>%{users}</b> usuários ativos na sua conta.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Atualize</a> seu plano para cobrir <b>%{users}</b> usuários ou remova os usuários inativos nas <a href="%{settings_url}" class="link font-bold">Configurações</a>.'
   submission_created_by_email_html: '<b>Envio criado</b> por %{email}'
   submission_created_by_email_via_source_html: '<b>Envio criado</b> por %{email} via %{source}'
   submission_created_via_source_html: '<b>Envio criado</b> via %{source}'
@@ -5634,6 +5698,8 @@ pt: &pt
   failed_to_save_the_scan: Não foi possível salvar a digitalização
   failed_to_scan_the_document: Não foi possível digitalizar o documento
   document_scanning_is_not_available_on_this_device: A digitalização de documentos não está disponível neste dispositivo
+  cc_view_only: CC Somente leitura
+  bcc_completed: BCC Concluído
   devise:
     confirmations:
       confirmed: Seu endereço de e-mail foi confirmado com sucesso.
@@ -5650,10 +5716,12 @@ pt: &pt
     link: Link
     mcp: MCP
     self: Assine você mesmo
+  error: Erro
   submission_event_names:
     send_email_to_html: '<b>Email enviado</b> para %{submitter_name}'
     bounce_email_html: '<b>Email não entregue</b> %{submitter_name}'
     complaint_email_html: '<b>Reclamação de spam</b> %{submitter_name}'
+    fail_sms_to_html: '<b>SMS não entregue</b> para %{submitter_name}'
     send_reminder_email_to_html: '<b>Email de lembrete enviado</b> para %{submitter_name}'
     send_sms_to_html: '<b>SMS enviado</b> para %{submitter_name}'
     send_2fa_sms_to_html: '<b>SMS de verificação enviado</b> para %{submitter_name}'
@@ -5684,6 +5752,8 @@ pt: &pt
     select_field: Selecionar campo
     select_column: Selecionar coluna
     new_field_mapping: Novo mapeamento de campo
+    add_mapping: Adicionar mapeamento
+    variables: Variáveis
     total_entries: Entradas totais
     upload_csv_or_xlsx_spreadsheet: Enviar planilha CSV ou XLSX
     click_to_upload: Clique para enviar
@@ -6402,6 +6472,7 @@ de: &de
   form_has_been_declined: Das Formular wurde abgelehnt.
   form_is_view_only: Das Formular ist schreibgeschützt.
   file_is_missing: Datei fehlt
+  file_is_not_an_image: Datei ist kein Bild
   folder_name_has_been_updated: Der Ordnername wurde aktualisiert.
   unable_to_rename_folder: Der Ordner konnte nicht umbenannt werden.
   template_has_been_removed: Die Vorlage wurde entfernt.
@@ -6433,6 +6504,7 @@ de: &de
   hmac_signing_secret: HMAC-Signaturgeheimnis
   hmac_signature_header_hint_html: 'Jede Anfrage wird mit dem %{header}-Header signiert: &lt;timestamp&gt;.&lt;sha256&gt;.'
   count_submissions_have_been_created: '%{count} Einreichungen wurden erstellt.'
+  this_document_is_being_processed_refresh_the_page_to_view_the_final_version: "Dieses Dokument wird verarbeitet. Aktualisieren Sie die Seite, um die endgültige Version anzuzeigen."
   sms_length_cant_be_longer_than_120_bytes: Die SMS-Länge darf 120 Bytes nicht überschreiten.
   connected_successfully: Erfolgreich verbunden.
   user_nameid_not_found: 'Benutzer %{nameid} nicht gefunden.'
@@ -6461,7 +6533,7 @@ de: &de
   thirty_days: 30 Tage
   free: Kostenlos
   unlimited_documents_storage: Unbegrenzter Dokumentenspeicher
-  users_management: Benutzerverwaltung
+  user_management: Benutzerverwaltung
   ten_field_types: 10 Feldtypen
   multiple_signers: Mehrere Unterzeichner
   automatic_esignature: Automatische E‑Signatur
@@ -6481,6 +6553,7 @@ de: &de
   developer_sandbox: Entwickler-Sandbox.
   upgrade_to_start_using_in_production_html: '<a href="%{url}" target="_blank" class="link font-semibold">Upgrade</a> durchführen, um die Produktionsnutzung zu starten.'
   download_combined_pdf: Kombiniertes PDF herunterladen
+  download_event_log: Ereignisprotokoll herunterladen
   audit_log: Prüfprotokoll
   signers: Unterzeichner
   not_invited_yet: Noch nicht eingeladen
@@ -6492,7 +6565,7 @@ de: &de
   declined_on_time: 'Abgelehnt am %{time}'
   expire_on_time: 'Läuft ab am %{time}'
   sign_in_person: Vor Ort unterschreiben
-  create_a_new_template_document_form_or_submit_the_existing_one_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Neue Vorlage erstellen</a> oder <a href="%{start_form_link}" target="_blank" class="inline underline font-medium">bestehende einreichen</a>
+  create_a_new_template_document_form_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Neue Vorlage erstellen</a>
   send_email_copy_with_completed_documents_to_a_specified_bcc_address: Senden Sie eine E-Mail-Kopie mit abgeschlossenen Dokumenten an eine angegebene BCC-Adresse.
   re_send_email: E-Mail erneut senden
   re_send_emails: E-Mails senden
@@ -6603,9 +6676,14 @@ de: &de
   click_here_to_update_your_payment_details_and_clear_the_invoice_to_ensure_uninterrupted_service_html: '<a href="%{url}" class="link">Klicken Sie hier</a>, um Ihre Zahlungsdaten zu aktualisieren und die Rechnung zu begleichen, um einen unterbrechungsfreien Service sicherzustellen.'
   overdue_payment: Überfällige Zahlung
   your_pro_plan_has_been_suspended_due_to_unpaid_invoices_you_can_update_your_payment_details_to_settle_the_invoice_and_continue_using_docuseal_or_cancel_your_subscription: Ihr Pro-Plan wurde aufgrund unbezahlter Rechnungen ausgesetzt. Sie können Ihre Zahlungsdaten aktualisieren, um die Rechnung zu begleichen und DocuSeal weiterhin zu nutzen, oder Ihr Abonnement kündigen.
+  get_the_docuseal_app_for_a_better_mobile_experience: Holen Sie sich die DocuSeal-App für ein besseres mobiles Erlebnis.
+  install_app: App installieren
   manage_subscription: Abonnement verwalten
   docuseal_version_security_release_is_available: "Das Sicherheitsupdate DocuSeal v%{version} ist verfügbar."
   click_here_to_view_the_instructions_and_update_your_app_html: '<a href="%{url}" class="link" target="_blank" rel="noopener noreferrer nofollow">Klicken Sie hier</a>, um die Anleitung anzuzeigen und Ihre App zu aktualisieren.'
+  your_pro_subscription_includes_count_user_seats_but_there_are_users_active_users_in_your_account_html:
+    one: 'Ihr Pro-Abonnement umfasst <b>%{count}</b> Benutzerplatz, aber in Ihrem Konto gibt es <b>%{users}</b> aktive Benutzer.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Erweitern</a> Sie Ihren Plan auf <b>%{users}</b> Benutzer oder entfernen Sie inaktive Benutzer in den <a href="%{settings_url}" class="link font-bold">Einstellungen</a>.'
+    other: 'Ihr Pro-Abonnement umfasst <b>%{count}</b> Benutzerplätze, aber in Ihrem Konto gibt es <b>%{users}</b> aktive Benutzer.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Erweitern</a> Sie Ihren Plan auf <b>%{users}</b> Benutzer oder entfernen Sie inaktive Benutzer in den <a href="%{settings_url}" class="link font-bold">Einstellungen</a>.'
   submission_created_by_email_html: '<b>Einreichung erstellt</b> von %{email}'
   submission_created_by_email_via_source_html: '<b>Einreichung erstellt</b> von %{email} über %{source}'
   submission_created_via_source_html: '<b>Einreichung erstellt</b> über %{source}'
@@ -6793,6 +6871,8 @@ de: &de
   failed_to_save_the_scan: Scan konnte nicht gespeichert werden
   failed_to_scan_the_document: Dokument konnte nicht gescannt werden
   document_scanning_is_not_available_on_this_device: Das Scannen von Dokumenten ist auf diesem Gerät nicht verfügbar
+  cc_view_only: CC Nur Ansicht
+  bcc_completed: BCC Abgeschlossen
   devise:
     confirmations:
       confirmed: Ihre E-Mail-Adresse wurde erfolgreich bestätigt.
@@ -6809,10 +6889,12 @@ de: &de
     link: Link
     mcp: MCP
     self: Selbst unterschreiben
+  error: Fehler
   submission_event_names:
     send_email_to_html: '<b>E-Mail gesendet</b> an %{submitter_name}'
     bounce_email_html: '<b>E-Mail unzustellbar</b> %{submitter_name}'
     complaint_email_html: '<b>Spam-Beschwerde</b> %{submitter_name}'
+    fail_sms_to_html: '<b>SMS unzustellbar</b> an %{submitter_name}'
     send_reminder_email_to_html: '<b>Erinnerungs-E-Mail gesendet</b> an %{submitter_name}'
     send_sms_to_html: '<b>SMS gesendet</b> an %{submitter_name}'
     send_2fa_sms_to_html: '<b>Verifizierungs-SMS gesendet</b> an %{submitter_name}'
@@ -6843,6 +6925,8 @@ de: &de
     select_field: Feld auswählen
     select_column: Spalte auswählen
     new_field_mapping: Neue Feldzuordnung
+    add_mapping: Zuordnung hinzufügen
+    variables: Variablen
     total_entries: Gesamteinträge
     upload_csv_or_xlsx_spreadsheet: CSV- oder XLSX-Tabelle hochladen
     click_to_upload: Klicken Sie, um hochzuladen
@@ -6975,14 +7059,14 @@ pl:
   decline_reason: Powód odrzucenia
   provide_a_reason: Podaj powód
   notify_the_sender_with_the_reason_you_declined: Powiadom nadawcę o powodzie, dla którego odrzuciłeś
-  form_has_been_declined_on_html: 'Formularz został odrzucony o <span class="font-semibold">%{time}</span>'
-  document_has_been_delegated_on_html: 'Dokument został oddelegowany o <span class="font-semibold">%{time}</span>'
+  form_has_been_declined_on_html: 'Formularz został odrzucony <span class="font-semibold">%{time}</span>'
+  document_has_been_delegated_on_html: 'Dokument został oddelegowany <span class="font-semibold">%{time}</span>'
   name_declined_by_submitter: '"%{name}" odrzucono przez %{submitter}'
   name_declined_by_submitter_with_the_following_reason: '"%{name}" został odrzucony przez %{submitter} z następującym powodem:'
   email: E-mail
   verification_code_code: 'Kod weryfikacyjny: %{code}'
   digitally_signed_by: Podpis cyfrowy przez
-  form_expired_at_html: 'Formularz wygasł o <span class="font-semibold">%{time}</span>'
+  form_expired_at_html: 'Formularz wygasł <span class="font-semibold">%{time}</span>'
   role: Rola
   provide_your_email_to_start: Podaj swój e-mail, aby rozpocząć
   provide_your_email: Podaj swój e-mail
@@ -7117,8 +7201,8 @@ uk:
   decline_reason: Причина відхилення
   provide_a_reason: Надайте причину
   notify_the_sender_with_the_reason_you_declined: Повідомте відправника про причину свого відхилення
-  form_has_been_declined_on_html: 'Форму було відхилено о <span class="font-semibold">%{time}</span>'
-  document_has_been_delegated_on_html: 'Документ було делеговано о <span class="font-semibold">%{time}</span>'
+  form_has_been_declined_on_html: 'Форму було відхилено <span class="font-semibold">%{time}</span>'
+  document_has_been_delegated_on_html: 'Документ було делеговано <span class="font-semibold">%{time}</span>'
   name_declined_by_submitter: '"%{name}" відхилено %{submitter}'
   name_declined_by_submitter_with_the_following_reason: '"%{name}" було відхилено %{submitter} з такою причиною:'
   email: E-mail
@@ -8089,6 +8173,7 @@ nl: &nl
   form_has_been_declined: Formulier is geweigerd.
   form_is_view_only: Formulier is alleen-lezen.
   file_is_missing: Bestand ontbreekt
+  file_is_not_an_image: Bestand is geen afbeelding
   folder_name_has_been_updated: Mapnaam is bijgewerkt.
   unable_to_rename_folder: Kan map niet hernoemen.
   template_has_been_removed: Sjabloon is verwijderd.
@@ -8120,6 +8205,7 @@ nl: &nl
   hmac_signing_secret: HMAC-ondertekeningsgeheim
   hmac_signature_header_hint_html: 'Elk verzoek wordt ondertekend met de %{header}-header: &lt;timestamp&gt;.&lt;sha256&gt;.'
   count_submissions_have_been_created: "%{count} inzendingen zijn aangemaakt."
+  this_document_is_being_processed_refresh_the_page_to_view_the_final_version: "Dit document wordt verwerkt. Vernieuw de pagina om de definitieve versie te bekijken."
   sms_length_cant_be_longer_than_120_bytes: SMS-lengte mag niet langer zijn dan 120 bytes
   connected_successfully: Succesvol verbonden.
   user_nameid_not_found: Gebruiker %{nameid} niet gevonden.
@@ -8148,7 +8234,7 @@ nl: &nl
   thirty_days: 30 dagen
   free: Gratis
   unlimited_documents_storage: Onbeperkte documentopslag
-  users_management: Gebruikersbeheer
+  user_management: Gebruikersbeheer
   ten_field_types: 10 veldtypen
   multiple_signers: Meerdere ondertekenaars
   automatic_esignature: Automatische e-handtekening
@@ -8168,6 +8254,7 @@ nl: &nl
   developer_sandbox: Ontwikkelaars-sandbox.
   upgrade_to_start_using_in_production_html: <a href="%{url}" target="_blank" class="link font-semibold">Upgrade</a> om in productie te gaan gebruiken.
   download_combined_pdf: Gecombineerde PDF downloaden
+  download_event_log: Gebeurtenislogboek downloaden
   audit_log: Auditlogboek
   signers: Ondertekenaars
   not_invited_yet: Nog niet uitgenodigd
@@ -8179,7 +8266,7 @@ nl: &nl
   declined_on_time: Geweigerd op %{time}
   expire_on_time: Verloopt op %{time}
   sign_in_person: In persoon ondertekenen
-  create_a_new_template_document_form_or_submit_the_existing_one_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Maak een nieuw sjabloon</a> voor een documentformulier of <a href="%{start_form_link}" target="_blank" class="inline underline font-medium">dien het bestaande in</a>
+  create_a_new_template_document_form_html: <a href="%{new_template_link}" data-turbo-frame="modal" class="inline underline font-medium">Maak een nieuw sjabloon</a> voor een documentformulier
   send_email_copy_with_completed_documents_to_a_specified_bcc_address: Stuur een e-mailkopie met voltooide documenten naar een opgegeven BCC-adres.
   re_send_email: E-mail opnieuw verzenden
   re_send_emails: E-mails verzenden
@@ -8290,9 +8377,14 @@ nl: &nl
   click_here_to_update_your_payment_details_and_clear_the_invoice_to_ensure_uninterrupted_service_html: <a href="%{url}" class="link">Klik hier</a> om uw betaalgegevens bij te werken en de factuur te voldoen om ononderbroken service te garanderen.
   overdue_payment: Achterstallige betaling
   your_pro_plan_has_been_suspended_due_to_unpaid_invoices_you_can_update_your_payment_details_to_settle_the_invoice_and_continue_using_docuseal_or_cancel_your_subscription: Uw Pro-abonnement is opgeschort vanwege onbetaalde facturen. U kunt uw betaalgegevens bijwerken om de factuur te voldoen en DocuSeal te blijven gebruiken of uw abonnement opzeggen.
+  get_the_docuseal_app_for_a_better_mobile_experience: Download de DocuSeal-app voor een betere mobiele ervaring.
+  install_app: App installeren
   manage_subscription: Abonnement beheren
   docuseal_version_security_release_is_available: "Beveiligingsupdate DocuSeal v%{version} is beschikbaar."
   click_here_to_view_the_instructions_and_update_your_app_html: '<a href="%{url}" class="link" target="_blank" rel="noopener noreferrer nofollow">Klik hier</a> om de instructies te bekijken en uw app bij te werken.'
+  your_pro_subscription_includes_count_user_seats_but_there_are_users_active_users_in_your_account_html:
+    one: 'Uw Pro-abonnement omvat <b>%{count}</b> gebruikersplaats, maar er zijn <b>%{users}</b> actieve gebruikers in uw account.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Upgrade</a> uw abonnement naar <b>%{users}</b> gebruikers of verwijder inactieve gebruikers via de <a href="%{settings_url}" class="link font-bold">Instellingen</a>.'
+    other: 'Uw Pro-abonnement omvat <b>%{count}</b> gebruikersplaatsen, maar er zijn <b>%{users}</b> actieve gebruikers in uw account.<br><a href="%{upgrade_url}" class="link font-bold" target="_blank" rel="noopener noreferrer nofollow">Upgrade</a> uw abonnement naar <b>%{users}</b> gebruikers of verwijder inactieve gebruikers via de <a href="%{settings_url}" class="link font-bold">Instellingen</a>.'
   submission_created_by_email_html: "<b>Inzending aangemaakt</b> door %{email}"
   submission_created_by_email_via_source_html: "<b>Inzending aangemaakt</b> door %{email} via %{source}"
   submission_created_via_source_html: "<b>Inzending aangemaakt</b> via %{source}"
@@ -8476,6 +8568,8 @@ nl: &nl
   failed_to_save_the_scan: Scan kon niet worden opgeslagen
   failed_to_scan_the_document: Document kon niet worden gescand
   document_scanning_is_not_available_on_this_device: Documenten scannen is niet beschikbaar op dit apparaat
+  cc_view_only: CC Alleen bekijken
+  bcc_completed: BCC Voltooid
   devise:
     confirmations:
       confirmed: Uw e-mailadres is succesvol bevestigd.
@@ -8492,10 +8586,12 @@ nl: &nl
     link: Link
     mcp: MCP
     self: Zelf ondertekenen
+  error: Fout
   submission_event_names:
     send_email_to_html: "<b>E-mail verzonden</b> naar %{submitter_name}"
     bounce_email_html: "<b>E-mail geretourneerd</b> %{submitter_name}"
     complaint_email_html: "<b>Spamklacht</b> %{submitter_name}"
+    fail_sms_to_html: "<b>SMS niet afgeleverd</b> naar %{submitter_name}"
     send_reminder_email_to_html: "<b>Herinneringsmail verzonden</b> naar %{submitter_name}"
     send_sms_to_html: "<b>SMS verzonden</b> naar %{submitter_name}"
     send_2fa_sms_to_html: "<b>Verificatie-SMS verzonden</b> naar %{submitter_name}"
@@ -8526,6 +8622,8 @@ nl: &nl
     select_field: Veld selecteren
     select_column: Kolom selecteren
     new_field_mapping: Nieuwe veldkoppeling
+    add_mapping: Koppeling toevoegen
+    variables: Variabelen
     total_entries: Totaal aantal items
     upload_csv_or_xlsx_spreadsheet: CSV- of XLSX-spreadsheet uploaden
     click_to_upload: Klik om te uploaden

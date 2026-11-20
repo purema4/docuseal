@@ -231,7 +231,7 @@ module Submissions
               document.metadata['sha256'] || document.checksum,
               "\n",
               { text: "#{I18n.t('generated_at')}: ", font: [FONT_NAME, { variant: :bold }] },
-              "#{I18n.l(document.created_at.in_time_zone(timezone), format: :long, locale: account.locale)} " \
+              "#{I18n.l(document.created_at.in_time_zone(timezone), format: :long)} " \
               "#{TimeUtils.timezone_abbr(timezone, document.created_at)}"
             ], line_spacing: 1.3
           )
@@ -267,7 +267,10 @@ module Submissions
 
         is_id_verified = submission_events.any?(&:complete_verification?)
 
-        is_kba_passed = submission_events.any?(&:complete_kba?)
+        complete_kba_event = submission_events.find(&:complete_kba?) || SubmissionEvent.new
+
+        kba_answers = complete_kba_event.data['answers']
+        kba_score = " (#{kba_answers['correct']}/#{kba_answers['asked']})" if kba_answers
 
         info_rows = [
           [
@@ -297,8 +300,8 @@ module Submissions
                 is_id_verified && {
                   text: "#{I18n.t('identity_verification')}: #{I18n.t('verified')}\n"
                 },
-                is_kba_passed && {
-                  text: "#{I18n.t('knowledge_based_authentication')}: #{I18n.t('passed')}\n"
+                complete_kba_event.persisted? && {
+                  text: "#{I18n.t('knowledge_based_authentication')}: #{I18n.t('passed')}#{kba_score}\n"
                 },
                 completed_event.data['ip'] && { text: "IP: #{completed_event.data['ip']}\n" },
                 completed_event.data['sid'] && { text: "#{I18n.t('session_id')}: #{completed_event.data['sid']}\n" },
@@ -437,7 +440,7 @@ module Submissions
               composer.formatted_text_box([{ text: value.to_s.titleize }], padding: [0, 0, 10, 0])
             else
               if field['type'] == 'date'
-                value = TimeUtils.format_date_string(value, field.dig('preferences', 'format'), account.locale,
+                value = TimeUtils.format_date_string(value, field.dig('preferences', 'format'), I18n.locale,
                                                      timezone:)
               end
 
@@ -466,7 +469,7 @@ module Submissions
       end
 
       events_data = submission.submission_events.sort_by(&:event_timestamp).filter_map do |event|
-        next if event.event_type.in?(%w[bounce_email complaint_email])
+        next if event.event_type.in?(%w[bounce_email complaint_email fail_sms])
 
         submitter = submission.submitters.find { |e| e.id == event.submitter_id }
         versions = submitter_versions_index[submitter.id] || []
@@ -484,8 +487,11 @@ module Submissions
 
         text =
           if event.event_type == 'complete_verification'
-            I18n.t('submission_event_names.complete_verification_by_html', provider: event.data['method'],
-                                                                           submitter_name:)
+            identity_name = [event.data['firstname'], event.data['lastname']].compact_blank.join(' ')
+            identity_name = TextUtils.maybe_rtl_reverse(identity_name) if identity_name.present?
+
+            I18n.t('submission_event_names.complete_verification_by_html',
+                   provider: event.data['method'], submitter_name: identity_name.presence || submitter_name)
           elsif event.event_type == 'invite_party' &&
                 (invited_submitter = submission.submitters.find { |e| e.uuid == event.data['uuid'] }) &&
                 (name = submission.template_submitters.find { |e| e['uuid'] == event.data['uuid'] }&.dig('name'))
@@ -527,7 +533,7 @@ module Submissions
         time_format = with_timestamp_seconds ? :detailed : :long
 
         [
-          "#{I18n.l(event.event_timestamp.in_time_zone(timezone), format: time_format, locale: account.locale)} " \
+          "#{I18n.l(event.event_timestamp.in_time_zone(timezone), format: time_format)} " \
           "#{TimeUtils.timezone_abbr(timezone, event.event_timestamp)}",
           composer.document.layout.formatted_text_box(text_box)
         ]

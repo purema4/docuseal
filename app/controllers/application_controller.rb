@@ -22,6 +22,7 @@ class ApplicationController < ActionController::Base
                 :true_ability,
                 :form_link_host,
                 :svg_icon,
+                :browser_os,
                 :turbo_native_ios?,
                 :turbo_native_android?
 
@@ -56,6 +57,10 @@ class ApplicationController < ActionController::Base
     @impersonated_user = user
 
     request.session[:impersonated_user_id] = user.uuid
+  end
+
+  def browser_os
+    @browser_os ||= DetectBrowserDevice.os(request.user_agent)
   end
 
   def pagy_auto(collection, **keyword_args)
@@ -118,7 +123,12 @@ class ApplicationController < ActionController::Base
   end
 
   def sign_in_for_demo
-    sign_in(User.active.order('random()').take) unless signed_in?
+    return if signed_in?
+
+    account = Account.create!(name: "Demo #{SecureRandom.hex(3)}")
+
+    sign_in(account.users.create!(first_name: 'Demo', last_name: 'User',
+                                  email: "#{SecureRandom.hex}@docuseal.com", password: SecureRandom.hex))
   end
 
   def current_account

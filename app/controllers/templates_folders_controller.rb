@@ -3,7 +3,9 @@
 class TemplatesFoldersController < ApplicationController
   load_and_authorize_resource :template
 
-  def edit; end
+  def edit
+    render layout: 'plain'
+  end
 
   def update
     authorize!(:update, @template)

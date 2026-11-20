@@ -6,6 +6,7 @@ module Templates
     ZIP_CONTENT_TYPE = 'application/zip'
     X_ZIP_CONTENT_TYPE = 'application/x-zip-compressed'
     JSON_CONTENT_TYPE = 'application/json'
+    WORD_EXTENSIONS = %w[.docx .doc .odt .rtf].freeze
     DOCUMENT_EXTENSIONS = %w[.docx .doc .xlsx .xls .odt .rtf].freeze
 
     DOCUMENT_CONTENT_TYPES = %w[
@@ -99,13 +100,15 @@ module Templates
           Zip::File.open(file.tempfile).each do |entry|
             next if entry.directory?
 
-            total_size += entry.size
+            tempfile = Tempfile.new(entry.name)
+            tempfile.binmode
+
+            total_size += entry.get_input_stream do |in_stream|
+              IO.copy_stream(in_stream, tempfile, MAX_ZIP_SIZE - total_size + 1)
+            end
 
             raise InvalidFileType, 'zip_too_large' if total_size > MAX_ZIP_SIZE
 
-            tempfile = Tempfile.new(entry.name)
-            tempfile.binmode
-            entry.get_input_stream { |in_stream| IO.copy_stream(in_stream, tempfile) }
             tempfile.rewind
 
             type = Marcel::MimeType.for(tempfile, name: entry.name)
@@ -134,7 +137,27 @@ module Templates
         return [handle_pdf_or_image(template, file, file.read, params, extract_fields:), []]
       end
 
+      if File.extname(file.original_filename.to_s).downcase.in?(WORD_EXTENSIONS)
+        return [handle_word_document(template, file, params), []]
+      end
+
       raise InvalidFileType, "#{file.content_type}/#{dynamic}"
+    end
+
+    def handle_word_document(template, file, params)
+      pdf = WordCraft.open_buffer(file, &:to_pdf)
+
+      pdf_file = ActionDispatch::Http::UploadedFile.new(
+        tempfile: StringIO.new(pdf),
+        filename: "#{File.basename(file.original_filename, '.*')}.pdf",
+        type: PDF_CONTENT_TYPE
+      )
+
+      handle_pdf_or_image(template, pdf_file, pdf, params)
+    end
+
+    def document_extensions
+      Docuseal.advanced_formats? ? DOCUMENT_EXTENSIONS : WORD_EXTENSIONS
     end
   end
 end

@@ -3,8 +3,8 @@
 class UsersController < ApplicationController
   load_and_authorize_resource :user, only: %i[index edit update destroy]
 
-  before_action :build_user, only: %i[new create]
-  authorize_resource :user, only: %i[new create]
+  before_action :build_user, only: :create
+  authorize_resource :user, only: :create
 
   def index
     @users =
@@ -31,9 +31,17 @@ class UsersController < ApplicationController
     end
   end
 
-  def new; end
+  def new
+    @user = current_account.users.new
 
-  def edit; end
+    authorize!(:create, @user)
+
+    render layout: turbo_native_app? ? 'plain' : true
+  end
+
+  def edit
+    render layout: turbo_native_app? ? 'plain' : true
+  end
 
   def create
     existing_user = User.accessible_by(current_ability).find_by(email: @user.email)

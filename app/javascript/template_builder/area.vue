@@ -319,7 +319,7 @@ export default {
       default: false
     }
   },
-  emits: ['start-resize', 'stop-resize', 'start-drag', 'stop-drag', 'remove', 'scroll-to', 'add-custom-field', 'click-title', 'multi-select'],
+  emits: ['start-resize', 'stop-resize', 'start-drag', 'stop-drag', 'remove', 'scroll-to', 'add-custom-field', 'click-title'],
   data () {
     return {
       isContenteditable: false,
@@ -700,11 +700,12 @@ export default {
       this.save()
     },
     onDefaultValueEnter (e) {
-      if (this.field.type !== 'heading') {
-        e.preventDefault()
+      if (this.field.type === 'heading') return
+      if (e.shiftKey && this.field.type === 'text') return
 
-        this.$refs.defaultValue.blur()
-      }
+      e.preventDefault()
+
+      this.$refs.defaultValue.blur()
     },
     resize (e) {
       if (e.target.id === 'mask') {
@@ -797,8 +798,6 @@ export default {
         } else {
           this.selectedAreasRef.value.splice(this.selectedAreasRef.value.indexOf(this.area), 1)
         }
-
-        this.$emit('multi-select', e)
 
         return
       }

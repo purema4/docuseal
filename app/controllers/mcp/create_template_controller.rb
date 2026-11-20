@@ -115,7 +115,11 @@ module Mcp
 
       documents, = Templates::CreateAttachments.call(@template, { files: [file] })
 
-      @template.update!(schema: documents.map { |doc| { attachment_uuid: doc.uuid, name: doc.filename.base } })
+      schema = documents.map do |doc|
+        { attachment_uuid: doc.uuid, name: FilenameUtils.basename(doc.blob[:filename]) }
+      end
+
+      @template.update!(schema:)
     end
 
     def url_filename(url)

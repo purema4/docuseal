@@ -7,7 +7,7 @@
       class="absolute top-0 bottom-0 right-0 left-0"
       @click.prevent="$emit('close')"
     />
-    <div :class="inline ? 'px-4 pt-3 pb-6' : 'modal-box pt-4 pb-6 px-6 mt-20 w-full max-w-xl'">
+    <div :class="inline ? (nativePlatform === 'android' ? 'pt-1.5 pb-6' : 'pt-3 pb-6') : 'modal-box pt-4 pb-6 px-6 mt-20 w-full max-w-xl'" :style="inline ? { paddingInline: '18px' } : null">
       <div
         v-if="!inline"
         class="flex justify-between items-center border-b pb-2 mb-2 font-medium"
@@ -33,7 +33,7 @@
           >{{ t('available_in_pro') }}</a>
         </div>
         <form @submit.prevent="validateSaveAndClose">
-          <div class="my-4">
+          <div :class="inline && nativePlatform === 'android' ? 'mt-1 mb-4' : 'my-4'">
             <div
               v-for="(condition, cindex) in conditions"
               :key="cindex"
@@ -105,7 +105,7 @@
                 </option>
               </select>
               <select
-                v-if="['radio', 'select', 'multiple'].includes(conditionField(condition)?.type) && conditionField(condition)?.options"
+                v-if="['radio', 'select', 'multiple'].includes(conditionField(condition)?.type) && conditionField(condition)?.options && !['greater_than', 'less_than'].includes(condition.action)"
                 class="select select-bordered select-sm w-full bg-white h-11 pl-4 text-base font-normal"
                 :class="{ 'text-gray-300': !condition.value }"
                 required
@@ -129,7 +129,7 @@
                 </option>
               </select>
               <input
-                v-else-if="conditionField(condition)?.type === 'number' && ['equal', 'not_equal', 'greater_than', 'less_than'].includes(condition.action)"
+                v-else-if="(conditionField(condition)?.type === 'number' && ['equal', 'not_equal', 'greater_than', 'less_than'].includes(condition.action)) || (['radio', 'select'].includes(conditionField(condition)?.type) && ['greater_than', 'less_than'].includes(condition.action))"
                 v-model="condition.value"
                 type="number"
                 step="any"
@@ -168,7 +168,7 @@
 <script>
 export default {
   name: 'ConditionModal',
-  inject: ['t', 'template', 'withConditions'],
+  inject: ['t', 'template', 'withConditions', 'nativePlatform'],
   props: {
     item: {
       type: Object,
@@ -239,6 +239,10 @@ export default {
         actions.push('checked', 'unchecked')
       } else if (['radio', 'select'].includes(field.type)) {
         actions.push('equal', 'not_equal')
+
+        if (this.isNumericOptions(field)) {
+          actions.push('greater_than', 'less_than')
+        }
       } else if (['multiple'].includes(field.type)) {
         actions.push('contains', 'does_not_contain')
       } else if (field.type === 'number') {
@@ -248,6 +252,11 @@ export default {
       }
 
       return actions
+    },
+    isNumericOptions (field) {
+      return !!field.options?.length && field.options.every((option) => {
+        return typeof option.value === 'string' && option.value.trim() !== '' && !Number.isNaN(Number(option.value))
+      })
     },
     validateSaveAndClose () {
       if (!this.withConditions) {

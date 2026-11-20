@@ -1,5 +1,5 @@
 <% completed_at = @submitter.completed_at || @submitter.submission.completed_at %>
-<main class="max-w-md mx-auto px-2 mt-12 mb-4">
+<div class="max-w-md mx-auto px-2 mt-12 mb-4">
   <div class="space-y-6 mx-auto">
     <div class="space-y-6">
       <div class="flex items-center justify-center">
@@ -13,7 +13,7 @@
           <div>
             <p dir="auto" class="text-lg font-bold mb-1"><%= @submitter.submission.name || @submitter.submission.template&.name %></p>
             <p dir="auto" class="text-sm">
-              <%= t(@submitter.with_signature_fields? ? 'signed_on_time' : 'completed_on_time', time: l(completed_at.to_date, format: :long)) %>
+              <%= t(@submitter.with_signature_fields? ? 'signed_on_time' : 'completed_on_time', time: l(completed_at.in_time_zone(@submitter.account.timezone).to_date, format: :long)) %>
             </p>
           </div>
         </div>
@@ -51,5 +51,5 @@
       </toggle-submit>
     <% end %>
   </div>
-</main>
+</div>
 <%= render 'shared/attribution', link_path: '/start', account: @submitter.account %>

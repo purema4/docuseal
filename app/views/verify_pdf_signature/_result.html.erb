@@ -35,10 +35,12 @@
               <%= svg_icon('user', class: 'w-5 h-5 inline') %>
               <span><%= signature.reason %></span>
             </div>
-            <div class="flex items-center space-x-1">
-              <%= svg_icon('calendar', class: 'w-5 h-5 inline') %>
-              <span><%= l(signature.signing_time.in_time_zone(current_account.timezone), format: :long, locale: current_account.locale) %></span>
-            </div>
+            <% if signature.signing_time %>
+              <div class="flex items-center space-x-1">
+                <%= svg_icon('calendar', class: 'w-5 h-5 inline') %>
+                <span><%= l(signature.signing_time.in_time_zone(current_account.timezone), format: :long, locale: current_account.locale) %></span>
+              </div>
+            <% end %>
             <div class="flex items-center space-x-1">
               <%= svg_icon('certificate', class: 'w-5 h-5 inline') %>
               <span><%= signature.common_name %></span>

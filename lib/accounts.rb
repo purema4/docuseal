@@ -5,34 +5,6 @@ module Accounts
 
   module_function
 
-  def create_duplicate(account)
-    new_account = account.dup
-
-    new_user = account.users.first.dup
-
-    new_user.uuid = SecureRandom.uuid
-    new_user.account = new_account
-    new_user.encrypted_password = SecureRandom.hex
-    new_user.email = "#{SecureRandom.hex}@docuseal.com"
-
-    account.templates.each do |template|
-      new_template = template.dup
-
-      new_template.account = new_account
-      new_template.slug = SecureRandom.base58(14)
-
-      new_template.archived_at = nil
-      new_template.save!
-
-      Templates::CloneAttachments.call(template: new_template, original_template: template)
-    end
-
-    new_user.save!(validate: false)
-    new_account.templates.update_all(folder_id: new_account.default_template_folder.id)
-
-    new_account
-  end
-
   def users_count(account)
     rel = User.where(account_id: account.id).or(
       User.where(account_id: account.account_linked_accounts
@@ -188,7 +160,7 @@ module Accounts
   def normalize_timezone(timezone)
     tzinfo = TZInfo::Timezone.get(ActiveSupport::TimeZone::MAPPING[timezone] || timezone)
 
-    ::ActiveSupport::TimeZone.all.find { |e| e.tzinfo == tzinfo }&.name || timezone
+    ::ActiveSupport::TimeZone.all.find { |e| e.tzinfo.canonical_zone == tzinfo.canonical_zone }&.name || timezone
   rescue TZInfo::InvalidTimezoneIdentifier
     'UTC'
   end

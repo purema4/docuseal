@@ -6,7 +6,17 @@ class TemplateDocumentsController < ApplicationController
   FILES_TTL = 5.minutes
 
   def index
-    render json: @template.schema_documents.map { |d| ActiveStorage::Blob.proxy_path(d.blob, expires_at: FILES_TTL.from_now.to_i) }
+    documents = @template.schema.map do |item|
+      if item['dynamic']
+        dynamic_document = @template.schema_dynamic_documents.find { |e| e.uuid == item['attachment_uuid'] }
+
+        DynamicDocuments::EnsureVersionGenerated.call(dynamic_document).document_attachment
+      else
+        @template.schema_documents.find { |e| e.uuid == item['attachment_uuid'] }
+      end
+    end
+
+    render json: documents.map { |d| ActiveStorage::Blob.proxy_path(d.blob, expires_at: FILES_TTL.from_now.to_i) }
   end
 
   def create
@@ -21,7 +31,7 @@ class TemplateDocumentsController < ApplicationController
     documents, = Templates::CreateAttachments.call(@template, params, extract_fields: true)
 
     schema = documents.map do |doc|
-      { attachment_uuid: doc.uuid, name: doc.filename.base }
+      { attachment_uuid: doc.uuid, name: FilenameUtils.basename(doc.blob[:filename]) }
     end
 
     render json: {

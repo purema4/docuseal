@@ -18,6 +18,7 @@ module ReplaceEmailVariables
   SUBMISSION_LINK = /\{+submission\.link\}+/i
   SUBMISSION_ID = /\{+submission\.id\}+/i
   SUBMISSION_EXPIRE_AT = /\{+submission\.expire_at\}+/i
+  SUBMISSION_VARIABLE = /\{+submission\.(?<variable_name>[^}]+)\}+/i
   SUBMITTERS = /\{+(?:submission\.)?submitters\}+/i
   SUBMITTERS_N_EMAIL = /\{+submitters\[(?<index>\d+)\]\.email\}+/i
   SUBMITTERS_N_NAME = /\{+submitters\[(?<index>\d+)\]\.name\}+/i
@@ -26,11 +27,13 @@ module ReplaceEmailVariables
   DOCUMENTS_LINKS = /\{+documents\.links\}+/i
   DOCUMENTS_LINK = /\{+documents\.link\}+/i
 
+  ESCAPED_BRACES = "\u{E000}\u{E001}"
+
   EMAIL_HOST = ENV.fetch('EMAIL_HOST', nil)
 
   module_function
 
-  # rubocop:disable Metrics
+  # rubocop:disable-next Metrics
   def call(text, submitter:, tracking_event_type: 'click_email', html_escape: false, sig: nil)
     text = replace(text, TEMPLATE_NAME, html_escape:) do
       (submitter.template || submitter.submission.template || submitter.submission).name
@@ -63,6 +66,10 @@ module ReplaceEmailVariables
       end
     end
 
+    text = replace(text, SUBMISSION_VARIABLE, html_escape:) do |match|
+      build_submission_variable(submitter.submission, match[:variable_name].to_s.strip)
+    end
+
     text = replace(text, SUBMITTERS_N_NAME, html_escape:) do |match|
       build_submitters_n_field(submitter.submission, match[:index].to_i - 1, :name)
     end
@@ -86,9 +93,12 @@ module ReplaceEmailVariables
       build_submitters_n_field(submitter.submission, index, :values, match[:field_name].to_s.strip)
     end
 
-    replace(text, SENDER_EMAIL, html_escape:) { submitter.submission.created_by_user&.email.to_s.sub(/\+\w+@/, '@') }
+    text = replace(text, SENDER_EMAIL, html_escape:) do
+      submitter.submission.created_by_user&.email.to_s.sub(/\+\w+@/, '@')
+    end
+
+    text.tr(ESCAPED_BRACES, '{}')
   end
-  # rubocop:enable Metrics
 
   def build_documents_links_text(submitter, sig = nil)
     url_options = build_url_options_for(submitter)
@@ -96,6 +106,12 @@ module ReplaceEmailVariables
     Rails.application.routes.url_helpers.submissions_preview_url(
       submitter.submission.slug, { sig:, **url_options }.compact
     )
+  end
+
+  def build_submission_variable(submission, variable_name)
+    variable_name.split('.').reduce(submission.variables) do |value, key|
+      value[key] if value.is_a?(Hash)
+    end
   end
 
   def build_submitters_n_field(submission, index, field_name, value_name = nil)
@@ -124,6 +140,8 @@ module ReplaceEmailVariables
 
             ActiveStorage::Blob.proxy_url(attachment.blob, expires_at:)
           end
+        elsif (mask = field.dig('preferences', 'mask').presence)
+          TextUtils.mask_value(value[field['uuid']].to_s, mask)
         else
           value[field&.dig('uuid')]
         end
@@ -134,10 +152,12 @@ module ReplaceEmailVariables
 
   def replace(text, var, html_escape: false)
     text.gsub(var) do
+      value = yield(Regexp.last_match).to_s.tr('{}', ESCAPED_BRACES)
+
       if html_escape
-        ERB::Util.html_escape(yield(Regexp.last_match))
+        ERB::Util.html_escape(value)
       else
-        yield(Regexp.last_match)
+        value
       end
     end
   end

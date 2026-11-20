@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby '4.0.5'
+ruby '4.0.10'
 
 gem 'addressable'
 gem 'arabic-letter-connector', require: false
@@ -45,6 +45,7 @@ gem 'trilogy', require: false
 gem 'turbo-rails'
 gem 'twitter_cldr', require: false
 gem 'tzinfo-data'
+gem 'wordcraft', require: false, group: :ce
 gem 'xlsxtream', require: false
 
 group :development, :test do

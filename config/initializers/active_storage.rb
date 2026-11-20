@@ -22,7 +22,7 @@ ActiveSupport.on_load(:active_storage_attachment) do
   end
 end
 
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable-next Metrics/BlockLength
 ActiveSupport.on_load(:active_storage_blob) do
   attribute :uuid, :string, default: -> { SecureRandom.uuid }
   attribute :io_data, :string, default: ''
@@ -59,31 +59,12 @@ ActiveSupport.on_load(:active_storage_blob) do
     service.delete(key)
   end
 end
-# rubocop:enable Metrics/BlockLength
 
 ActiveStorage::LogSubscriber.detach_from(:active_storage) if Rails.env.production?
 
 Rails.configuration.to_prepare do
-  ActiveStorage::DiskController.after_action do
-    response.set_header('cache-control', 'public, max-age=31536000') if action_name == 'show'
-  end
-
-  ActiveStorage::Blobs::ProxyController.before_action do
-    response.set_header('Access-Control-Allow-Origin', '*')
-    response.set_header('Access-Control-Allow-Methods', 'GET')
-    response.set_header('Access-Control-Allow-Headers', '*')
-    response.set_header('Access-Control-Max-Age', '1728000')
-  end
-
-  ActiveStorage::Blobs::RedirectController.before_action do
-    response.set_header('Access-Control-Allow-Origin', '*')
-    response.set_header('Access-Control-Allow-Methods', 'GET')
-    response.set_header('Access-Control-Allow-Headers', '*')
-    response.set_header('Access-Control-Max-Age', '1728000')
-  end
-
-  ActiveStorage::DirectUploadsController.before_action do
-    head :forbidden
+  ActiveStorage::DiskController.after_action(only: :show) do
+    response.set_header('cache-control', 'public, max-age=31536000')
   end
 
   LoadActiveStorageConfigs.call

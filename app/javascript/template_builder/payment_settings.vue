@@ -203,7 +203,7 @@
         >{{ t('learn_more') }}</a>
       </div>
       <li
-        v-if="withFormula || nativePlatform !== 'ios'"
+        v-if="withFormula || !nativePlatform"
         class="field-settings-formula mb-1"
       >
         <label
@@ -233,7 +233,7 @@
         </label>
       </li>
       <li
-        v-if="withCondition && (withConditions || nativePlatform !== 'ios')"
+        v-if="withCondition && (withConditions || !nativePlatform)"
         class="field-settings-condition mt-1"
       >
         <label
@@ -414,7 +414,7 @@ export default {
     checkStripeStatus () {
       this.isLoading = true
 
-      fetch('/api/stripe_connect').then(async (resp) => {
+      fetch('/stripe_connect').then(async (resp) => {
         const { status } = await resp.json()
 
         if (status === 'connected') {
@@ -427,7 +427,7 @@ export default {
       })
     },
     checkPaypalStatus () {
-      fetch('/api/paypal_connect').then(async (resp) => {
+      fetch('/paypal_connect').then(async (resp) => {
         const { status } = await resp.json()
 
         if (status === 'connected') {

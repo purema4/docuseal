@@ -272,7 +272,7 @@ export default {
     FieldSubmitter,
     IconX
   },
-  inject: ['t', 'isMobile', 'nativePlatform'],
+  inject: ['t', 'nativePlatform'],
   props: {
     template: {
       type: Object,

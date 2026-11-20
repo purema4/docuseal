@@ -9,6 +9,8 @@ module Submitters
     PHONE_REGEXP = /[+\d()\s-]+/
     NONEDITABLE_FIELD_TYPES = %w[stamp heading strikethrough].freeze
     REQUIRED_FIELD_TYPES = %w[payment kba verification].freeze
+    CHOICE_FIELD_TYPES = %w[radio multiple select].freeze
+    BOOLEAN_VALUES = [true, false].freeze
 
     STRFTIME_MAP = {
       'hour' => '%-k',
@@ -55,6 +57,7 @@ module Submitters
         validate_values!(reason_field ? values.except(reason_field['uuid']) : values, submitter, params, request)
 
         if params[:completed] == 'true'
+          validate_invite_submitters!(submitter)
           maybe_invite_via_field(submitter, request)
 
           SubmissionEvents.create_with_tracking_data(submitter, 'complete_form', request)
@@ -72,13 +75,14 @@ module Submitters
       submitter.completed_at = Time.current
       submitter.ip = request.remote_ip
       submitter.ua = request.user_agent
-      submitter.timezone = request.params[:timezone]
+      submitter.timezone = request.params[:timezone] if ActiveSupport::TimeZone[request.params[:timezone].to_s]
 
       submitter.values = merge_default_values(submitter)
 
       required_field_uuids_acc = Set.new
 
-      submitter.values = maybe_remove_condition_values(submitter, required_field_uuids_acc:)
+      submitter.values = maybe_remove_condition_values(submitter, formula_values: build_formula_values(submitter),
+                                                                  required_field_uuids_acc:)
 
       formula_values = build_formula_values(submitter)
 
@@ -201,10 +205,10 @@ module Submitters
       default_values.compact_blank.merge(submitter.values)
     end
 
-    def build_formula_values(submitter)
-      submission_values = nil
+    def build_formula_values(submitter, submission_values: nil)
+      submission = submitter.submission
 
-      computed_values = submitter.submission.template_fields.each_with_object({}) do |field, acc|
+      computed_values = (submission.template_fields || submission.template.fields).each_with_object({}) do |field, acc|
         next if field['submitter_uuid'] != submitter.uuid
         next if field['type'] == 'payment'
 
@@ -294,17 +298,17 @@ module Submitters
                                 field:)
     end
 
-    def maybe_remove_condition_values(submitter, required_field_uuids_acc: nil)
+    def maybe_remove_condition_values(submitter, formula_values: {}, required_field_uuids_acc: nil)
       submission = submitter.submission
 
-      submitters_values = nil
+      submitters_values = formula_values.merge(merge_submitters_values(submitter)) if formula_values.present?
       has_other_submitters = submission.template_submitters.size > 1
 
       has_document_conditions = submission_has_document_conditions?(submission)
 
       attachments_index =
         if has_document_conditions
-          submitters_values = merge_submitters_values(submitter)
+          submitters_values ||= merge_submitters_values(submitter)
 
           Submissions.filtered_conditions_schema(submission, values: submitters_values)
                      .index_by { |i| i['attachment_uuid'] }
@@ -381,7 +385,7 @@ module Submitters
       end.exclude?(false)
     end
 
-    # rubocop:disable Metrics
+    # rubocop:disable-next Metrics
     def check_field_condition(condition, submitter_values, fields_uuid_index)
       value = submitter_values[condition['field_uuid']]
       field = fields_uuid_index[condition['field_uuid']]
@@ -434,7 +438,6 @@ module Submitters
         true
       end
     end
-    # rubocop:enable Metrics
 
     def replace_default_variables(value, attrs, submission, with_time: false, field: nil)
       return value if value.in?([true, false]) || value.is_a?(Numeric) || value.is_a?(Array)
@@ -504,7 +507,7 @@ module Submitters
       submitter
     end
 
-    def validate_value!(_value, field, _params, submitter, _request)
+    def validate_value!(value, field, _params, submitter, _request)
       raise ValidationError, 'Missing field' unless field
       raise ValidationError, 'Invalid field' if field['submitter_uuid'] != submitter.uuid
 
@@ -514,7 +517,34 @@ module Submitters
         raise ValidationError, 'Read-only field'
       end
 
+      raise ValidationError, 'Value is invalid' if field['type'] == 'checkbox' && !value.in?(BOOLEAN_VALUES)
+
+      validate_choice_value!(value, field, submitter) if field['type'].in?(CHOICE_FIELD_TYPES)
+
       true
+    end
+
+    def validate_choice_value!(value, field, submitter)
+      return if value.blank?
+
+      raise ValidationError, 'Value is invalid' unless value.is_a?(field['type'] == 'multiple' ? Array : String)
+
+      option_names = field['options'].to_a.map.with_index do |option, index|
+        option['value'].presence ||
+          "#{I18n.t('option', locale: submitter.metadata.fetch('lang', submitter.account.locale))} #{index + 1}"
+      end
+
+      raise ValidationError, 'Value is invalid' unless Array.wrap(value).all? { |item| option_names.include?(item) }
+    end
+
+    def validate_invite_submitters!(submitter)
+      submission = submitter.submission
+
+      is_pending_invite = (submission.template_submitters || submission.template.submitters).any? do |s|
+        s['invite_by_uuid'] == submitter.uuid && submission.submitters.none? { |e| e.uuid == s['uuid'] }
+      end
+
+      raise ValidationError, 'Invite required' if is_pending_invite
     end
   end
 end

@@ -602,6 +602,8 @@ module Submissions
             cell_valign = field.dig('preferences', 'valign').to_s.presence_in(TEXT_VALIGNS) || 'center'
             cell_layouter = cell_layouters[cell_valign]
 
+            value = value.to_s
+
             if (mask = field.dig('preferences', 'mask').presence)
               value = TextUtils.mask_value(value, mask)
             end
@@ -882,6 +884,8 @@ module Submissions
     end
 
     def maybe_flatten_pdf(pdf)
+      pdf.catalog.delete(:AcroForm) if pdf.catalog[:AcroForm].is_a?(Integer)
+
       pdf.acro_form.create_appearances(force: true) if pdf.acro_form && pdf.acro_form[:NeedAppearances]
       pdf.acro_form&.flatten
     rescue HexaPDF::MissingGlyphError

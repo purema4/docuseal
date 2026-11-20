@@ -156,7 +156,7 @@ export default {
       return this.provider === 'paypal'
     },
     paymentEndpoint () {
-      return this.isPaypal ? '/api/paypal_payments' : '/api/stripe_payments'
+      return `/s/${this.submitterSlug}/${this.isPaypal ? 'paypal_payments' : 'stripe_payments'}`
     },
     sessionId () {
       return this.queryParams.get('stripe_session_id') || this.queryParams.get('paypal_order_id') || (this.isPaypal && this.queryParams.get('token'))
@@ -253,11 +253,8 @@ export default {
     },
     async submit () {
       if (this.sessionId) {
-        return fetch(this.baseUrl + this.paymentEndpoint + '/' + this.sessionId, {
+        return fetch(this.baseUrl + this.paymentEndpoint + '/' + encodeURIComponent(this.sessionId), {
           method: 'PUT',
-          body: JSON.stringify({
-            submitter_slug: this.submitterSlug
-          }),
           ...this.fetchOptions,
           headers: { 'Content-Type': 'application/json', ...this.fetchOptions.headers }
         }).then(async (resp) => {
@@ -294,7 +291,6 @@ export default {
       fetch(this.baseUrl + this.paymentEndpoint, {
         method: 'POST',
         body: JSON.stringify({
-          submitter_slug: this.submitterSlug,
           field_uuid: this.field.uuid,
           check_status: checkStatus,
           referer: this.normalizedPaymentUrl()

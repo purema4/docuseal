@@ -152,12 +152,20 @@ module Submitters
     preferences['send_sms'] = params['send_sms'].in?(TRUE_VALUES) if params.key?('send_sms')
     preferences['require_phone_2fa'] = params['require_phone_2fa'].in?(TRUE_VALUES) if params.key?('require_phone_2fa')
     preferences['require_email_2fa'] = params['require_email_2fa'].in?(TRUE_VALUES) if params.key?('require_email_2fa')
-    preferences['bcc_completed'] = params['bcc_completed'] if params.key?('bcc_completed')
+    preferences['bcc_completed'] = normalize_bcc_completed(params['bcc_completed']) if params.key?('bcc_completed')
     preferences['reply_to'] = params['reply_to'] if params.key?('reply_to')
     preferences['go_to_last'] = params['go_to_last'] if params.key?('go_to_last')
     preferences['completed_redirect_url'] = params['completed_redirect_url'] if params.key?('completed_redirect_url')
 
     preferences
+  end
+
+  def normalize_bcc_completed(value)
+    if value.is_a?(Array)
+      value.compact_blank.uniq.join(', ')
+    else
+      value
+    end
   end
 
   def fetch_values_for_delegate(submitter)
@@ -189,7 +197,7 @@ module Submitters
     end
   end
 
-  # rubocop:disable Metrics
+  # rubocop:disable-next Metrics
   def current_submitter_order?(submitter)
     submission = submitter.submission
 
@@ -220,12 +228,11 @@ module Submitters
       submitter.nil? || submitter.viewer? || submitter.completed_at?
     end
   end
-  # rubocop:enable Metrics
 
   def build_document_filename(submitter, blob, filename_format)
     return blob.filename.to_s if filename_format.blank?
 
-    filename = filename_format.gsub('{document.name}', blob.filename.base)
+    filename = filename_format.gsub('{document.name}', FilenameUtils.basename(blob[:filename]))
     filename = ReplaceEmailVariables.call(filename, submitter:)
 
     filename = filename.gsub(' - {submission.status}') do
@@ -280,12 +287,12 @@ module Submitters
     email_digest = Digest::MD5.base64digest(submitter.email.downcase.squish)
 
     RateLimit.call("verify-2fa-code-#{email_digest}", limit: 2, ttl: 45.seconds, enabled: true)
-    RateLimit.call("verify-2fa-code-1h-#{email_digest}", limit: 10, ttl: 1.hour, enabled: true)
-    RateLimit.call("verify-2fa-code-1d-#{email_digest}", limit: 20, ttl: 1.day, enabled: true)
 
     link_2fa_key = [submitter.email.downcase.squish, submitter.submission.template.slug].join(':')
 
-    raise InvalidOtp, I18n.t(:invalid_code) unless EmailVerificationCodes.verify(otp, link_2fa_key)
+    unless OtpChallenges.verify(otp.to_s.gsub(/\D/, ''), link_2fa_key, purpose: 'form_email_2fa')
+      raise InvalidOtp, I18n.t(:invalid_code)
+    end
 
     true
   end

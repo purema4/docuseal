@@ -8,6 +8,7 @@ class SubmitFormController < ApplicationController
   skip_authorization_check
 
   before_action :load_submitter, only: %i[show update completed]
+  before_action :maybe_render_not_found_for_search_bot, only: %i[show completed]
   before_action :maybe_redirect_delegated, only: %i[show completed]
   before_action :maybe_render_locked_page, only: :show
   before_action :maybe_require_link_2fa, only: %i[show]
@@ -20,7 +21,7 @@ class SubmitFormController < ApplicationController
     return render :email_2fa unless Submitters::AuthorizedForForm.pass_email_2fa?(@submitter, request)
 
     if @submitter.completed_at? || submission.completed_at?
-      return redirect_to submit_form_completed_path(@submitter.slug)
+      return redirect_to submit_form_completed_path(@submitter.slug, lang:)
     end
 
     @form_configs = Submitters::FormConfigs.call(@submitter, CONFIG_KEYS)
@@ -50,7 +51,7 @@ class SubmitFormController < ApplicationController
   end
 
   def update
-    unless Submitters::AuthorizedForForm.call(@submitter, current_user, request)
+    unless Submitters::AuthorizedForForm.call(@submitter, current_user, request, with_order: with_order(@submitter))
       return render json: { error: I18n.t('verification_required_refresh_the_page_and_pass_2fa') },
                     status: :unprocessable_content
     end
@@ -96,7 +97,7 @@ class SubmitFormController < ApplicationController
 
     return if Submitters::AuthorizedForForm.call(@submitter, current_user, request)
 
-    redirect_to submit_form_path(params[:submit_form_slug])
+    redirect_to submit_form_path(params[:submit_form_slug], lang:)
   end
 
   def success; end
@@ -111,10 +112,18 @@ class SubmitFormController < ApplicationController
 
   private
 
+  def maybe_render_not_found_for_search_bot
+    return unless DetectBrowserDevice.search_bot?(request.user_agent)
+
+    Rollbar.warning("Search bot: submitter #{@submitter&.id}") if defined?(Rollbar)
+
+    raise ActionController::RoutingError, I18n.t('not_found')
+  end
+
   def maybe_require_link_2fa
     return if Submitters::AuthorizedForForm.pass_link_2fa?(@submitter, current_user, request)
 
-    redirect_to start_form_path(@submitter.submission.template.slug)
+    redirect_to start_form_path(@submitter.submission.template.slug, lang:)
   end
 
   def maybe_render_locked_page
@@ -143,5 +152,14 @@ class SubmitFormController < ApplicationController
   def build_attachments_index(submission)
     ActiveStorage::Attachment.where(record: submission.submitters, name: :attachments)
                              .preload(:blob).index_by(&:uuid)
+  end
+
+  def with_order(submitter)
+    params[:completed] == 'true' && submitter.present? &&
+      submitter.submission.template&.preferences&.dig('submitters_order') == 'preserved'
+  end
+
+  def lang
+    params[:lang].presence
   end
 end

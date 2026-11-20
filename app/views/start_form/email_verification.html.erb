@@ -2,7 +2,7 @@
 <% I18n.with_locale(@template.account.locale) do %>
   <% content_for(:html_description, t('account_name_has_invited_you_to_fill_and_sign_documents_online_effortlessly_with_a_secure_fast_and_user_friendly_digital_document_signing_solution', account_name: @template.account.name)) %>
 <% end %>
-<main class="max-w-md mx-auto px-2 mt-12 mb-4">
+<div class="max-w-md mx-auto px-2 mt-12 mb-4">
   <div class="space-y-6 mx-auto">
     <div class="space-y-6">
       <div class="flex items-center justify-center">
@@ -23,7 +23,7 @@
     <div>
       <%= t('we_sent_a_one_time_verification_code_to_your_email_address_please_enter_the_code_below_to_continue') %>
     </div>
-    <%= form_for '', url: @resubmit_submitter ? resubmit_form_path : start_form_path(@template.slug), method: :put, html: { class: 'space-y-4', id: 'code_form' } do |f| %>
+    <%= form_for '', url: @resubmit_submitter ? resubmit_form_path : start_form_path(@template.slug, lang: params[:lang].presence), method: :put, html: { class: 'space-y-4', id: 'code_form' } do |f| %>
       <div dir="auto" class="form-control !mt-0">
         <%= f.hidden_field 'resubmit', value: params[:resubmit] %>
         <%= f.hidden_field 'submitter[name]', value: params[:name] || params.dig(:submitter, :name) %>
@@ -52,7 +52,7 @@
     <% if @resubmit_submitter %>
       <%= button_to t(:re_send_email), resubmit_form_path, params: { resubmit: @resubmit_submitter.slug }, method: :put, id: 'resend_code', class: 'hidden' %>
     <% else %>
-      <%= button_to t(:re_send_email), start_form_email_2fa_send_index_path, params: { slug: @template.slug, resend: true, submitter: { name: params[:name] || params.dig(:submitter, :name), email: params[:email] || params.dig(:submitter, :email), phone: params[:phone] || params.dig(:submitter, :phone) } }.compact, method: :post, id: 'resend_code', class: 'hidden' %>
+      <%= button_to t(:re_send_email), start_form_email_2fa_send_index_path, params: { slug: @template.slug, resend: true, submitter: { name: params[:name] || params.dig(:submitter, :name), email: params[:email] || params.dig(:submitter, :email), phone: params[:phone] || params.dig(:submitter, :phone) }, lang: params[:lang] }.compact, method: :post, id: 'resend_code', class: 'hidden' %>
     <% end %>
   </div>
-</main>
+</div>
